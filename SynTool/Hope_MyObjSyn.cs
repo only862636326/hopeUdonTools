@@ -20,7 +20,7 @@ namespace SGS
         
         void Start()
         {
-            hugf = GameObject.Find("Hugf").GetComponent<HopeTools.HopeUdonFramework>();   
+            //hugf = GameObject.Find("Hugf").GetComponent<HopeTools.HopeUdonFramework>();   
         }
         float delay_tim = 0.1f;
         void Update()
@@ -73,7 +73,7 @@ namespace SGS
 
             var t = this._card_id << 8;
             t |= this.card_idx;
-            hugf.TriggerEventWithData(nameof(SGS_Input.UnChooseGenerlCall), t);
+            //hugf.TriggerEventWithData(nameof(SGS_Input.UnChooseGenerlCall), t);
             _is_pick_up = true;
         }
 
@@ -89,7 +89,7 @@ namespace SGS
             {
                 var t = this._card_id << 8;
                 t |= this.card_idx;
-                hugf.TriggerEventWithData(nameof(SGS_Input.ChooseGeneralCall), t);
+                //hugf.TriggerEventWithData(nameof(SGS_Input.ChooseGeneralCall), t);
             }
         }
 

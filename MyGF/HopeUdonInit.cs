@@ -31,7 +31,7 @@ namespace HopeTools
                     var _p = tf.GetComponent<UdonSharpBehaviour>();
                     if (_p != null)
                     {
-                        hugf.SetProgramVariable("hugf", hugf);
+                        _p.SetProgramVariable("hugf", hugf);
 
                         _p.SendCustomEvent("Init");
                         _p.SendCustomEventDelayedSeconds("HugfInit", HUGF_INIT_DELAY_GET);
@@ -42,7 +42,7 @@ namespace HopeTools
                     var udon = tf.GetComponentsInChildren<UdonSharpBehaviour>();
                     foreach (var item in udon)
                     {
-                        hugf.SetProgramVariable("hugf", hugf);
+                        item.SetProgramVariable("hugf", hugf);
 
                         item.SendCustomEvent("Init");
                         item.SendCustomEventDelayedSeconds("HugfInit", HUGF_INIT_DELAY_GET);
