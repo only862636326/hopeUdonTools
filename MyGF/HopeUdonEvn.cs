@@ -1,5 +1,6 @@
 ﻿using UdonSharp;
 using UnityEngine;
+using UnityEngine.UI;
 using VRC.SDKBase;
 using VRC.Udon;
 using static UnityEngine.UI.CanvasScaler;
@@ -227,47 +228,39 @@ namespace HopeTools
             }
         }
 
-        public void TriggerEventWithTf(string eventName, object data)
+        #region re evn
+        private string evn_his = "";
+        public Text show_his;
+        public void TriggerReEventWith2Data(string eventName, object data, object data2)
         {
-            hugf.udondebug.LogUdonMsg(this, $"trg event dat: {eventName}, {data}");
-            for (int i = 0; i < eventNames.Length; i++)
+            TriggerEventWith2Data(eventName, data, data2);
+            evn_his += $"\n{eventName}|{data}|{data2}";
+            if (show_his != null)
             {
-                if (eventNames[i] == eventName)
-                {
-                    foreach (var listener in eventListeners[i])
-                    {
-                        if (listener != null)
-                        {
-                            listener.SetProgramVariable("eventTfData", data);
-                            listener.SendCustomEvent(eventName);
-                        }
-                    }
-                    return;
-                }
+                show_his.text = evn_his;
             }
         }
 
-        public void TriggerEventWithTfInt(string eventName, Transform tf, int data)
+        public void TriggerReEventWithData(string eventName, object data)
         {
-            hugf.udondebug.LogUdonMsg(this, $"trg event dat: {eventName}, {data}");
-            for (int i = 0; i < eventNames.Length; i++)
+            TriggerEventWithData(eventName, data);
+            evn_his += $"\n{eventName}|{data}";
+            if (show_his != null)
             {
-                if (eventNames[i] == eventName)
-                {
-                    foreach (var listener in eventListeners[i])
-                    {
-                        if (listener != null)
-                        {
-                            listener.SetProgramVariable("eventData", data);
-                            listener.SetProgramVariable("eventTfData", tf);
-                            listener.SendCustomEvent(eventName);
-                        }
-                    }
-                    return;
-                }
+                show_his.text = evn_his;
             }
         }
 
+        public void TriggerReEvent(string eventName)
+        {
+            TriggerEvent(eventName);
+            evn_his += $"\n{eventName}";
+            if (show_his != null)
+            {
+                show_his.text = evn_his;
+            }
+        }
+        #endregion end re evn
         // 触发网络同步事件
         public void NetworkTriggerEvent(string eventName)
         {

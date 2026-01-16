@@ -16,6 +16,7 @@ namespace HopeTools
         public HopeUdonDebug udondebug;
         public HopeUdonPoolManager udonPool;
         public HopeUdonIoc udonIoc;
+        public HopeUdonEvnRe udonEvnRe;
         public int get_test_val;
         private bool _is_init = false;
 
@@ -52,7 +53,7 @@ namespace HopeTools
             udonEvn.Init();
             udonPool.Init();
             udonIoc.Init();
-
+            udonEvnRe.Init();
             // 初始化事件系统
             if (udonEvn != null)
             {
@@ -76,6 +77,7 @@ namespace HopeTools
                 udonEvn.TriggerEvent(eventName);
             }
         }
+
         public void TriggerEventWithData(string eventName, object dat)
         {
             if (udonEvn != null)
@@ -92,6 +94,42 @@ namespace HopeTools
             }
         }
 
+        public void TriggerReEvent(string eventName)
+        {
+            if (udonEvn != null)
+            {
+                udonEvn.TriggerEvent(eventName);
+            }
+            if(udonEvnRe != null)
+            {
+                udonEvnRe.AddEvn(eventName);
+            }
+        }
+
+        public void TriggerReEventWithData(string eventName, object dat)
+        {
+            if (udonEvn != null)
+            {
+                udonEvn.TriggerEventWithData(eventName, dat);
+            }
+            if (udonEvnRe != null)
+            {
+                udonEvnRe.AddEvnWithDat(eventName, dat);
+            }
+        }
+
+        public void TriggerReEventWith2Data(string eventName, object dat, object dat2)
+        {
+            if (udonEvn != null)
+            {
+                udonEvn.TriggerEventWith2Data(eventName, dat, dat2);
+            }
+            if (udonEvnRe != null)
+            {
+                udonEvnRe.AddEvnWith2Dat(eventName, dat, dat2);
+            }
+        }
+
         public void Log(string message)
         {
             if(udondebug != null)
@@ -99,7 +137,6 @@ namespace HopeTools
                 udondebug.Log(message);
             }
         }
-
 
         // 新增对象池管理接口
         public GameObject GetPooledObject()
