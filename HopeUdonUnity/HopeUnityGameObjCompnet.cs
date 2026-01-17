@@ -30,24 +30,24 @@ namespace HopeTools
             TextFunTextInit();
         }
 
-        #region GameObjState
+        #region GameObj fun
         private Transform _game_bj_title;
         private Toggle _gameobj_sta_toggle;
         private InputField _gameobj_name_input;
         private bool _is_fun_gamesta_init = false;
         void GameStaFunInit()
         {
-            if(_is_fun_gamesta_init)
+            if (_is_fun_gamesta_init)
             {
                 return;
             }
             _is_fun_gamesta_init = true;
 
             _game_bj_title = __Inspector_size_prt.Find("GameObjectTitle");
-            _gameobj_sta_toggle = _game_bj_title.Find("ToggleSta").GetComponent<Toggle>();
+            _gameobj_sta_toggle = _game_bj_title.Find("ToggleActive").GetComponent<Toggle>();
             _gameobj_name_input = _game_bj_title.GetComponentInChildren<InputField>();
-
         }
+
         void GameStaFunTextInit()
         {
             if (active_obj != null)
@@ -74,6 +74,7 @@ namespace HopeTools
             }
         }
         #endregion GameObjState
+
 
         #region Transform Fun
         private Transform _item_transform;
@@ -255,6 +256,8 @@ namespace HopeTools
             }
         }
         #endregion Text Fun
+
+
 
         #region 
 

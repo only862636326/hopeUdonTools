@@ -707,7 +707,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8398476089998111399}
   m_HandleRect: {fileID: 272636066693234703}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -896,7 +896,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0.000018250197}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &5511009490194469832
@@ -1965,7 +1965,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 19.435, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0.411, y: 0.494}
+  m_AnchoredPosition: {x: 0.41101074, y: 0.49401855}
   m_SizeDelta: {x: 1517, y: 720}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &4280824244201213364
@@ -2013,7 +2013,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &1497912621331733335
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6958,7 +6958,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8223141729171651800}
   m_HandleRect: {fileID: 2263202991777654312}
   m_Direction: 0
-  m_Value: -0.015625
+  m_Value: 1.5
   m_Size: 0.9999978
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -7626,7 +7626,6 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 1118829128211985684}
   _list_item_pre: {fileID: 6322752012201225323}
-  _list_item_offeset: {fileID: 0}
   managed_root_list: {fileID: 0}
   item_show_num: 0
 --- !u!114 &1118829128211985684
@@ -8017,7 +8016,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -0.034240723}
   m_SizeDelta: {x: 0.0009384155, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &223722574750282108

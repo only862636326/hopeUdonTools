@@ -10,13 +10,12 @@ namespace HopeTools
 
     public class HopeUnityGameObjList : UdonSharpBehaviour
     {
+        public const int CONFIG_TILE_TABLE_SIZE = 20;
+        public const string CONFIG_STRING_ICON = "ToggleIcom";
+        public const string CONFIG_STRING_NAME = "ToggleName";
+
         public const int max_item_num = 50;
         public GameObject _list_item_pre; // perfab for list item
-        public GameObject _list_item_offeset; // perfab for list item
-
-        private Vector3 item_p_offset;
-        private Vector3 item_p_base;
-
 
         private GameObject[] itemgameObjList;
         private Transform[] itemManagerTfList;
@@ -27,6 +26,10 @@ namespace HopeTools
         public Transform managed_root_list;
         private bool _is_init = false;
         public int item_show_num = 0;
+
+        private Vector3 icon_p_base;
+        private Vector3 name_p_base;
+
         // 初始化
         void Start()
         {
@@ -44,25 +47,18 @@ namespace HopeTools
             _prt_idx_list = new int[max_item_num];
             itemManagerTfList = new Transform[max_item_num];
 
-
-            if(_list_item_offeset == null)
-            {
-                _list_item_offeset = _list_item_pre.transform.parent.GetChild(1).gameObject;
-            }
-
-            var offset = _list_item_offeset.transform.localPosition -_list_item_pre.transform.localPosition;
             var prt = _list_item_pre.transform.parent;
-            item_p_offset = offset;
-            item_p_base = _list_item_pre.transform.localPosition;
+
 
             for (int i = 0; i < itemgameObjList.Length; i++)
             {
                 itemgameObjList[i] = Instantiate(_list_item_pre, prt);
                 itemgameObjList[i].SetActive(false);
-                itemgameObjList[i].transform.localPosition = item_p_base + item_p_offset * i;
             }
 
-            Destroy(_list_item_offeset);
+            name_p_base = itemgameObjList[0].transform.Find(CONFIG_STRING_NAME).localPosition;
+            icon_p_base = itemgameObjList[0].transform.Find(CONFIG_STRING_ICON).localPosition;
+
             Destroy(_list_item_pre);
 
             UpdateItemList();
@@ -83,10 +79,10 @@ namespace HopeTools
             // LogMessge("OnToggleValueChanged_Name");
             for (int i = 0; i < item_show_num; i++)
             {
-                if (_toggle_is_on_name_list[i] != itemgameObjList[i].transform.GetChild(1).GetComponent<UnityEngine.UI.Toggle>().isOn)
+                if (_toggle_is_on_name_list[i] != itemgameObjList[i].transform.Find(CONFIG_STRING_NAME).GetComponent<UnityEngine.UI.Toggle>().isOn)
                 {
-                    _toggle_is_on_name_list[i] = itemgameObjList[i].transform.GetChild(1).GetComponent<UnityEngine.UI.Toggle>().isOn;
-                    LogMessge("OnToggleValueChanged_Name " + i + " " + itemgameObjList[i].name);
+                    _toggle_is_on_name_list[i] = itemgameObjList[i].transform.Find(CONFIG_STRING_NAME).GetComponent<UnityEngine.UI.Toggle>().isOn;
+                    //LogMessge("OnToggleValueChanged_Name " + i + " " + itemgameObjList[i].name);
                 }
             }
         }
@@ -99,7 +95,7 @@ namespace HopeTools
                 return true;
             }
 
-            if (itemgameObjList[idx].transform.GetChild(0).GetComponent<UnityEngine.UI.Toggle>().isOn == false)
+            if (itemgameObjList[idx].transform.Find("ToggleIcom").GetComponent<UnityEngine.UI.Toggle>().isOn == false)
             {
                 return false;
             }
@@ -118,7 +114,6 @@ namespace HopeTools
                 if (CheckIsActive(_prt_idx_list[i]))
                 {
                     itemgameObjList[i].SetActive(true);
-                    itemgameObjList[i].transform.localPosition = item_p_base + item_p_offset * _show_idx;
                     _show_idx++;
                 }
                 else
@@ -140,19 +135,37 @@ namespace HopeTools
             if (tf == null || this.item_show_num >= this.itemgameObjList.Length - 1)
                 return;
 
-            var s = new string(' ', depth * 4) + tf.name;
-            this.itemgameObjList[this.item_show_num].SetActive(true);
-            this.itemgameObjList[this.item_show_num].name = s;
-            this.itemgameObjList[this.item_show_num].transform.GetChild(1).GetChild(0).GetComponent<UnityEngine.UI.Text>().text = s;
+            var s = "  " + tf.name;
+            var item = this.itemgameObjList[this.item_show_num];
+            
+            item.SetActive(true);
+            item.name = s;
+            var text = item.transform.Find(CONFIG_STRING_NAME).GetChild(0).GetComponent<UnityEngine.UI.Text>();
+            text.text = s;
+            if (tf.gameObject.activeInHierarchy == false)
+            {
+                text.color = new Color(0.6f, 0.6f, 0.6f, 1.0f);
+            }
+            else
+            {
+                text.color = Color.black;
+            }
+            
             this._prt_idx_list[this.item_show_num] = prt_idx;
             this.itemManagerTfList[this.item_show_num] = tf;
+
+            var toggle_icon = item.transform.Find(CONFIG_STRING_ICON);
+            toggle_icon.localPosition = icon_p_base + new Vector3(depth * CONFIG_TILE_TABLE_SIZE, 0, 0);
+
+            var toggle_name = item.transform.Find(CONFIG_STRING_NAME);
+            toggle_name.localPosition = name_p_base + new Vector3(depth * CONFIG_TILE_TABLE_SIZE, 0, 0);
 
             prt_idx = this.item_show_num;
             this.item_show_num++;
 
             if (tf.childCount == 0)
             {
-                this.itemgameObjList[prt_idx].transform.GetChild(0).gameObject.SetActive(false);
+                item.transform.Find(CONFIG_STRING_ICON).gameObject.SetActive(false);
             }
             else
             {

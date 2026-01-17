@@ -19,18 +19,7 @@ namespace HopeTools
             "ls -la | grep test",
             "# This is a comment",
             "if ($x > 5) { echo \"big\" }",
-            "cat file.txt >> output.txt",
-            // New operator tests
-            "x = 2 + 3 * 4 - 5 / 6 % 7 ** 8",
-            "if (a == b && c != d || e <= f && g >= h)",
-            "counter++",
-            "value--",
-            "total += 10",
-            "count -= 5",
-            "result *= 2",
-            "average /= count",
-            "remainder %= 3",
-            "flags = a & b | c ^ ~d"
+            "cat file.txt >> output.txt"
         };
         
         void Start()
@@ -74,80 +63,43 @@ namespace HopeTools
         
         private string GetTokenDisplayString(int tokenType, string tokenValue)
         {
-            // Basic tokens
-            if (tokenType == 1) return $"[IDENTIFIER] {tokenValue}";
-            if (tokenType == 2) return $"[STRING] \"{tokenValue}\"";
-            if (tokenType == 3) return $"[NUMBER] {tokenValue}";
-            if (tokenType == 0) return $"[IDENTIFIER] {tokenValue}";
-            if (tokenType == 50) return $"[VARIABLE] {tokenValue}";
-            if (tokenType == 52) return $"[COMMAND] {tokenValue}";
-            if (tokenType == 40) return $"[WHITESPACE] '{tokenValue.Replace(" ", "·")}'";
-            if (tokenType == 41) return "[NEWLINE]";
-            if (tokenType == 53) return $"[COMMENT] {tokenValue}";
-            if (tokenType == 100) return "[EOF]";
-            
-            // Arithmetic operators
-            if (tokenType == 60) return "[PLUS] +";
-            if (tokenType == 61) return "[MINUS] -";
-            if (tokenType == 62) return "[MULTIPLY] *";
-            if (tokenType == 63) return "[DIVIDE] /";
-            if (tokenType == 64) return "[MODULO] %";
-            if (tokenType == 65) return "[POWER] **";
-            
-            // Comparison operators
-            if (tokenType == 70) return "[EQUAL] ==";
-            if (tokenType == 71) return "[NOT_EQUAL] !=";
-            if (tokenType == 72) return "[LESS_EQUAL] <=";
-            if (tokenType == 73) return "[GREATER_EQUAL] >=";
-            if (tokenType == 74) return "[LESS] <";
-            if (tokenType == 75) return "[GREATER] >";
-            
-            // Logical operators
-            if (tokenType == 80) return "[NOT] !";
-            if (tokenType == 81) return "[BITWISE_AND] &";
-            if (tokenType == 82) return "[BITWISE_OR] |";
-            if (tokenType == 83) return "[BITWISE_XOR] ^";
-            if (tokenType == 84) return "[BITWISE_NOT] ~";
-            
-            // Increment/Decrement
-            if (tokenType == 90) return "[INCREMENT] ++";
-            if (tokenType == 91) return "[DECREMENT] --";
-            
-            // Compound assignment
-            if (tokenType == 92) return "[PLUS_ASSIGN] +=";
-            if (tokenType == 93) return "[MINUS_ASSIGN] -=";
-            if (tokenType == 94) return "[MUL_ASSIGN] *=";
-            if (tokenType == 95) return "[DIV_ASSIGN] /=";
-            if (tokenType == 96) return "[MOD_ASSIGN] %=";
-            
-            // Shell operators
-            if (tokenType == 4) return "[ASSIGN] =";
-            if (tokenType == 11) return "[PIPE] |";
-            if (tokenType == 12) return "[REDIRECT_OUT] >";
-            if (tokenType == 13) return "[REDIRECT_IN] <";
-            if (tokenType == 14) return "[APPEND] >>";
-            if (tokenType == 15) return "[SEMICOLON] ;";
-            if (tokenType == 16) return "[AND] &&";
-            if (tokenType == 17) return "[OR] ||";
-            
-            // Special characters
-            if (tokenType == 20) return "[DOLLAR] $";
-            if (tokenType == 21) return "[DOT] .";
-            if (tokenType == 22) return "[SLASH] /";
-            if (tokenType == 23) return "[BACKSLASH] \\";
-            if (tokenType == 24) return "[QUOTE] \"";
-            if (tokenType == 25) return "[SINGLE_QUOTE] '"; 
-            if (tokenType == 26) return "[BACKTICK] `";
-            
-            // Grouping
-            if (tokenType == 30) return "[LPAREN] (";
-            if (tokenType == 31) return "[RPAREN] )";
-            if (tokenType == 32) return "[LBRACE] {";
-            if (tokenType == 33) return "[RBRACE] }";
-            if (tokenType == 34) return "[LBRACKET] [";
-            if (tokenType == 35) return "[RBRACKET] ]";
-            
-            return $"[UNKNOWN_{tokenType}] {tokenValue}";
+            switch (tokenType)
+            {
+                case 40: // TOKEN_WHITESPACE
+                    return $"[WHITESPACE] '{tokenValue.Replace(" ", "·")}'";
+                case 41: // TOKEN_NEWLINE
+                    return "[NEWLINE]";
+                case 1: // TOKEN_STRING
+                    return $"[STRING] \"{tokenValue}\"";
+                case 2: // TOKEN_NUMBER
+                    return $"[NUMBER] {tokenValue}";
+                case 0: // TOKEN_IDENTIFIER
+                    return $"[IDENTIFIER] {tokenValue}";
+                case 50: // TOKEN_VARIABLE
+                    return $"[VARIABLE] {tokenValue}";
+                case 52: // TOKEN_COMMAND
+                    return $"[COMMAND] {tokenValue}";
+                case 10: // TOKEN_ASSIGN
+                    return "[ASSIGN] =";
+                case 11: // TOKEN_PIPE
+                    return "[PIPE] |";
+                case 12: // TOKEN_REDIRECT_OUT
+                    return "[REDIRECT_OUT] >";
+                case 13: // TOKEN_REDIRECT_IN
+                    return "[REDIRECT_IN] <";
+                case 14: // TOKEN_APPEND
+                    return "[APPEND] >>";
+                case 15: // TOKEN_SEMICOLON
+                    return "[SEMICOLON] ;";
+                case 16: // TOKEN_AND
+                    return "[AND] &&";
+                case 17: // TOKEN_OR
+                    return "[OR] ||";
+                case 100: // TOKEN_EOF
+                    return "[EOF]";
+                default:
+                    return $"[{tokenType}] {tokenValue}";
+            }
         }
         
         // Test method that can be called from Unity Inspector

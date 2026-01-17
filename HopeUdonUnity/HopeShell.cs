@@ -1,4 +1,5 @@
 ﻿
+using System.Threading.Tasks;
 using librsync.net;
 using Newtonsoft.Json.Linq;
 using UdonSharp;
@@ -12,12 +13,7 @@ namespace HopeTools
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class HopeShell : UdonSharpBehaviour
     {
-        [SerializeField] public int maxHistoryLines = 50;
         // Udon compatible arrays instead of Lists and Dictionaries
-        private string[] commandHistory;
-        private int historyCount = 0;
-        private int currentHistoryIndex = -1;
-        private string currentInput = "";
 
         // Variables for triple Enter detection 
         private float tripleEnterTimeWindow = 1.0f; // 1 second window for triple press
@@ -36,8 +32,6 @@ namespace HopeTools
         void Start()
         {
             // Initialize arrays
-            commandHistory = new string[maxHistoryLines];
-
             variableNames = new string[maxVariables];
             variableValues = new string[maxVariables];
             variableType = new string[maxVariables];
@@ -56,17 +50,30 @@ namespace HopeTools
             {
                 OnCmdLineSubmit();
             }
+            if (Input.GetKeyDown(KeyCode.UpArrow))
+            {
+                OnCmdLineUpArrow();
+            }
+            else if (Input.GetKeyDown(KeyCode.DownArrow))
+            {
+                OnCmdLineDownArrow();
+            }
+            ForbigCheck();
         }
 
-        private void AddCommandToHistory(string command)
+        private bool _is_forbig = false;
+        void ForbigCheck()
         {
-            if (string.IsNullOrEmpty(command)) return;
-
-            // Add to history (circular buffer)
-            commandHistory[historyCount % maxHistoryLines] = command;
-            historyCount++;
-            currentHistoryIndex = historyCount;
+            // ctrl + alt + t
+            if (Input.GetKeyDown(KeyCode.T) && Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftAlt))
+            {
+                _is_forbig = !_is_forbig;
+                PrintLine("HopeShell Forbig mode : " + (_is_forbig ? "ON" : "OFF"));
+            }
+            Networking.LocalPlayer.Immobilize(_is_forbig);
         }
+
+ 
 
         private void ProcessCommand(string command)
         {
@@ -280,9 +287,9 @@ namespace HopeTools
         private void ShowHistory()
         {
             PrintLine("Command History:");
-            for (int i = 0; i < historyCount; i++)
+            for (int i = 0; i < historyCmd.Length; i++)
             {
-                PrintLine("  " + (i + 1) + ": " + commandHistory[i]);
+                PrintLine("  " + (i + 1) + ": " + historyCmd[i]);
             }
         }
 
@@ -378,18 +385,16 @@ namespace HopeTools
 
         private string MemberVariableEq(Transform tf, string memberPath, string value)
         {
-            memberPath = memberPath.ToLower();
             if (memberPath.StartsWith("."))
             {
                 memberPath = memberPath.Substring(1);
             }
 
-            int equalPos = memberPath.IndexOf(".");
+            //memberPath = memberPath.ToLower();
 
             var _mem1 = "";
             var _mem2 = "";
             var _mem3 = "";
-
             var sp = memberPath.Split('.');
 
             if (sp.Length >= 1)
@@ -405,7 +410,7 @@ namespace HopeTools
                 _mem3 = sp[2];
             }
 
-            switch (_mem1)
+            switch (_mem1.ToLower())
             {
                 case "transform":
                 case "tf":
@@ -414,7 +419,7 @@ namespace HopeTools
                     break;
                 case "active":
                 case "enable":
-                case "isenabled":   
+                case "isenabled":
                 case "en":
                     return GetSetActiveState(tf, value);
                     break;
@@ -425,16 +430,120 @@ namespace HopeTools
                 case "toggle":
                 case "tog":
                 case "tg":
-                    return GetSetToggle(tf,_mem2 ,value);
+                    return GetSetToggle(tf, _mem2, value);
                     break;
                 case "udon":
+                case "udonsharp":
+                case "u":
                     return GetSetUdon(tf, _mem2, value);
+                    break;
+                case "uevn":
+                case "uevent":
+                case "ut":
+                case "udonevent":
+                    return GetSetUdonEvn(tf, _mem2, value);
                     break;
                 default:
                     ;
                     break;
             }
             return "[err] illege";
+        }
+
+        public string SubStringList(string valset)
+        {
+            if (valset.StartsWith("(") && valset.EndsWith(")"))
+            {
+                valset = valset.Substring(1, valset.Length - 2);
+                return valset;
+            }
+            else if (valset.StartsWith("[") && valset.EndsWith("]"))
+            {
+                valset = valset.Substring(1, valset.Length - 2);
+                return valset;  
+            }
+            else if (valset.StartsWith("{") && valset.EndsWith("}"))
+            {
+                valset = valset.Substring(1, valset.Length - 2);
+                return valset;  
+            }
+            else
+            {
+                return "";
+            }
+        }
+        public bool TryParseIntList(string valset, out int[] intArray)
+        {
+            intArray = null;
+            valset = SubStringList(valset);
+            var sp = valset.Split(',');
+            if(sp.Length == 0)
+            {
+                return false;
+            }
+            intArray = new int[sp.Length];
+            for (int i = 0; i < sp.Length; i++)
+            {
+                if(int.TryParse(sp[i], out int j))
+                {
+                    intArray[i] = j;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return true;    
+        }
+
+        public bool TryParseFloatList(string valset, out float[] floatArray)
+        {
+            floatArray = null;
+            valset = SubStringList(valset);
+            var sp = valset.Split(',');
+            if (sp.Length == 0)
+            {
+                return false;
+            }
+            floatArray = new float[sp.Length];
+            for (int i = 0; i < sp.Length; i++)
+            {
+                if (float.TryParse(sp[i], out float j))
+                {
+                    floatArray[i] = j;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private string GetSetUdonEvn(Transform tf, string _mem2, string valset)
+        {
+            if (tf == null)
+            {
+                return "[err] :No active Transform selected";
+            }
+            var udon_comps = tf.GetComponent<UdonSharpBehaviour>();
+            if (udon_comps == null)
+            {
+                return "[err] : No UdonBehaviour component found on the selected Transform";
+            }
+            if (string.IsNullOrEmpty(_mem2))
+            {
+                return udon_comps.enabled.ToString();
+            }
+            var dat = "";
+            if (string.IsNullOrEmpty(valset))
+            {
+                MyParseValue(valset, out object b, out string typ);
+                udon_comps.SetProgramVariable("evntdat", b);
+                dat = "set " + _mem2 + " to " + b.ToString();
+            }
+            udon_comps.SendCustomEvent(_mem2);
+            return "Sent event " + _mem2;
         }
 
         private string GetSetUdon(Transform tf, string _mem2, string valset)
@@ -461,22 +570,133 @@ namespace HopeTools
                     return udon_comps.enabled.ToString();
                 }
 
-                ParseValue(valset, out object val, out string typ);
-                if (typ == "bool")
+                if(TypParseBool(valset, out bool b))
                 {
-                    udon_comps.enabled = (bool)val;
+                    udon_comps.enabled = b;
                 }
+                return "set enabled to " + udon_comps.enabled.ToString();
             }
+
+            var obj = udon_comps.GetProgramVariable(_mem2);
+            if (obj == null)
+            {
+                return "[err] : Variable " + _mem2 + " not found";
+            }
+            var typ = obj.GetType();
+            var val = obj.ToString();
 
             if (string.IsNullOrEmpty(valset))
             {
-                return udon_comps.GetProgramVariable(_mem2).ToString();
+
+                return ".u." + _mem2 + " : typ = " + typ + " , val = " + val;
             }
             {
-                ParseValue(valset, out object val, out string typ);
-                udon_comps.SetProgramVariable(_mem2, val);
-                return "set " + _mem2 + " to " + valset;
+                // valset = GetParsedValue(valset, typ);
+                if(typ == typeof(bool))
+                {  
+                    if(TypParseBool(valset, out bool b))
+                    {
+                        udon_comps.SetProgramVariable(_mem2, b);
+                        return "set " + _mem2 + " to " + b.ToString();
+                    }
+                }
+                else if(typ == typeof(int))
+                {
+                    if(int.TryParse(valset, out int i))
+                    {
+                        udon_comps.SetProgramVariable(_mem2, i);
+                        return "set " + _mem2 + " to " + i.ToString();
+                    }
+                }
+                else if(typ == typeof(float))
+                {
+                    if(float.TryParse(valset, out float f))
+                    {
+                        udon_comps.SetProgramVariable(_mem2, f);
+                        return "set " + _mem2 + " to " + f.ToString();
+                    }
+                }
+
+                else if(typ == typeof(string))
+                {
+                    udon_comps.SetProgramVariable(_mem2, valset);
+                    return "set " + _mem2 + " to " + valset;
+                }
+
+                else if(typ == typeof(Vector3))
+                {
+                    if(TryParseFloatList(valset, out float[] v3))
+                    {
+                        if(v3.Length != 3)
+                        {
+                            return "[err] : Set " + _mem2 + " failed, invalid value: " + valset;
+                        }
+                        udon_comps.SetProgramVariable(_mem2, new Vector3(v3[0], v3[1], v3[2]));
+                        return "set " + _mem2 + " to " + new Vector3(v3[0], v3[1], v3[2]).ToString();
+                    }
+                }
+                else if (typ == typeof(Vector3Int))
+                {
+                    if (TryParseIntList(valset, out int[] v3i))
+                    {
+                        if (v3i.Length != 3)
+                        {
+                            return "[err] : Set " + _mem2 + " failed, invalid value: " + valset;
+                        }
+                        udon_comps.SetProgramVariable(_mem2, new Vector3Int(v3i[0], v3i[1], v3i[2]));
+                        return "set " + _mem2 + " to " + new Vector3Int(v3i[0], v3i[1], v3i[2]).ToString();
+                    }
+                }
+                else if (typ == typeof(Vector2))
+                {
+                    if (TryParseFloatList(valset, out float[] v2f))
+                    {
+                        if (v2f.Length != 2)
+                        {
+                            return "[err] : Set " + _mem2 + " failed, invalid value: " + valset;
+                        }
+                        udon_comps.SetProgramVariable(_mem2, new Vector2(v2f[0], v2f[1]));
+                        return "set " + _mem2 + " to " + new Vector2(v2f[0], v2f[1]).ToString();
+                    }
+                }
+                else if (typ == typeof(Vector2Int))
+                {
+                    if (TryParseIntList(valset, out int[] v2i))
+                    {
+                        if (v2i.Length != 2)
+                        {
+                            return "[err] : Set " + _mem2 + " failed, invalid value: " + valset;
+                        }
+                        udon_comps.SetProgramVariable(_mem2, new Vector2Int(v2i[0], v2i[1]));
+                        return "set " + _mem2 + " to " + new Vector2Int(v2i[0], v2i[1]).ToString();
+                    }
+                }
+                else if (typ == typeof(int[]))
+                {
+                    // int 数组
+                    if (!TryParseIntList(valset, out int[] intArray))
+                    {
+                        return "[err] : Set " + _mem2 + " failed, invalid value: " + valset;
+                    }
+                    udon_comps.SetProgramVariable(_mem2, intArray);
+                    return "set " + _mem2 + " to " + intArray.ToString();
+                }
+                else if (typ == typeof(float[]))
+                {
+                    // float 数组
+                    if (!TryParseFloatList(valset, out float[] floatArray))
+                    {
+                        return "[err] : Set " + _mem2 + " failed, invalid value: " + valset;
+                    }
+                    udon_comps.SetProgramVariable(_mem2, floatArray);
+                    return "set " + _mem2 + " to " + floatArray.ToString();
+                }
+                else
+                {
+                    return "[err] : Set " + _mem2 + " failed, invalid value: " + valset;
+                }
             }
+            return "[err] : Unknown";
         }
 
         private string GetSetToggle(Transform tf, string _mem2, string valset)
@@ -495,14 +715,14 @@ namespace HopeTools
                 return toggle_comp.isOn.ToString();
             }
 
+            _mem2 = _mem2.ToLower();
             if (_mem2 == "ison" || _mem2 == "is_on" || _mem2 == "on" || _mem2 == "")
             {
-                ParseValue(valset, out object val, out string typ);
-                if (typ == "bool")
+                if(TypParseBool(valset, out bool b))
                 {
-                    toggle_comp.isOn = (bool)val;
+                    toggle_comp.isOn = b;
                     return "set isOn to " + toggle_comp.isOn.ToString();
-                }                
+                }
                 else
                 {
                     return "[err] : Set isOn failed, invalid value: " + valset;
@@ -511,7 +731,7 @@ namespace HopeTools
             
             else if (_mem2 == "enable" || _mem2 == "active" || _mem2 == "isenabled" || _mem2 == "en")
             {
-                ParseValue(valset, out object val, out string typ);
+                MyParseValue(valset, out object val, out string typ);
                 if (typ == "bool")
                 {
                     toggle_comp.enabled = (bool)val;
@@ -545,20 +765,18 @@ namespace HopeTools
                 return text_comp.text;
             }
 
-
             if (_mem2 == "text" || _mem2 == "" || _mem2 == "t")
             {
-                ParseValue(valset, out object val, out string typ);
+                MyParseValue(valset, out object val, out string typ);
                 text_comp.text = val.ToString();
                 return text_comp.text;
             }
 
             else if (_mem2 == "fontsize" || _mem2 == "fts")
             {
-                ParseValue(valset, out object val, out string typ);
-                if (typ == "int")
+                if(int.TryParse(valset, out int fts))
                 {
-                    text_comp.fontSize = (int)val;
+                    text_comp.fontSize = fts;
                 }
                 else
                 {
@@ -569,10 +787,9 @@ namespace HopeTools
 
             else if (_mem2 == "enable" || _mem2 == "active" || _mem2 == "isenabled" || _mem2 == "en")
             {
-                ParseValue(valset, out object val, out string typ);
-                if (typ == "bool")
+                if (TypParseBool(valset, out bool b))
                 {
-                    text_comp.enabled = (bool)val;
+                    text_comp.enabled = b;
                 }
                 else
                 {
@@ -580,7 +797,6 @@ namespace HopeTools
                 }
                 return "set active to " + text_comp.enabled.ToString();
             }
-
 
             return "[err] illege";
         }
@@ -596,10 +812,9 @@ namespace HopeTools
                 return tf.gameObject.activeSelf.ToString();
             }
 
-            ParseValue(valset, out object val, out string typ);
-            if (typ == "bool")
+           if(TypParseBool(valset, out bool b))
             {
-                tf.gameObject.SetActive((bool)val);
+                tf.gameObject.SetActive(b);
                 return tf.gameObject.activeSelf.ToString();
             }
             else
@@ -642,6 +857,7 @@ namespace HopeTools
         // Helper method to get Transform property value and type
         private void GetSetTransformPropertyValue(Transform tf, string propertyName, string valset, out object val, out string typ)
         {
+
             if (propertyName == "")
             {
                 val = $"name : {tf.name},active : {tf.gameObject.activeSelf}, position : {tf.position}, localPosition : {tf.localPosition}, localScale : {tf.localScale}";
@@ -660,7 +876,7 @@ namespace HopeTools
 
                     if (!string.IsNullOrEmpty(valset))
                     {
-                        ParseValue(valset, out object vpos, out string typpos);
+                        MyParseValue(valset, out object vpos, out string typpos);
                         if (typpos == "Vector3")
                         {
                             tf.position = (Vector3)vpos;
@@ -684,7 +900,7 @@ namespace HopeTools
 
                     if (!string.IsNullOrEmpty(valset))
                     {
-                        ParseValue(valset, out object vpos, out string typpos);
+                        MyParseValue(valset, out object vpos, out string typpos);
                         if (typpos == "Vector3")
                         {
                             tf.localPosition = (Vector3)vpos;
@@ -698,7 +914,7 @@ namespace HopeTools
 
                     if (!string.IsNullOrEmpty(valset))
                     {
-                        ParseValue(valset, out object vpos, out string typpos);
+                        MyParseValue(valset, out object vpos, out string typpos);
                         if (typpos == "Vector3")
                         {
                             tf.localScale = (Vector3)vpos;
@@ -718,7 +934,7 @@ namespace HopeTools
 
                     if (!string.IsNullOrEmpty(valset))
                     {
-                        ParseValue(valset, out object vpos, out string typpos);
+                        MyParseValue(valset, out object vpos, out string typpos);
                         if (typpos == "Vector3")
                         {
                             tf.localRotation = Quaternion.Euler((Vector3)vpos);
@@ -736,7 +952,7 @@ namespace HopeTools
 
                     if (!string.IsNullOrEmpty(valset))
                     {
-                        ParseValue(valset, out object vpos, out string typpos);
+                        MyParseValue(valset, out object vpos, out string typpos);
                         if (typpos == "Vector3")
                         {
                             tf.rotation = Quaternion.Euler((Vector3)vpos);
@@ -751,7 +967,7 @@ namespace HopeTools
 
                     if (!string.IsNullOrEmpty(valset))
                     {
-                        ParseValue(valset, out object vpos, out string typpos);
+                        MyParseValue(valset, out object vpos, out string typpos);
                         if (typpos == "Vector3")
                         {
                             tf.localRotation = Quaternion.Euler((Vector3)vpos);
@@ -765,7 +981,7 @@ namespace HopeTools
             }
         }
 
-        private void ParseValue(string valueStr, out object value, out string typ)
+        private void MyParseValue(string valueStr, out object value, out string typ)
         {
             if (valueStr.StartsWith("$")) // variable reference
             {
@@ -872,6 +1088,34 @@ namespace HopeTools
             typ = "string";
             return;
         }
+
+        public bool TypParseBool(string valueStr, out bool result)
+        {
+            valueStr = valueStr.Trim().ToLower();
+            if (valueStr.StartsWith("$"))
+            {
+                valueStr = GetVariable(valueStr.Substring(1).Trim());
+                if (string.IsNullOrEmpty(valueStr))
+                {
+                    result = false;
+                    return false;
+                }
+            }
+
+            if (valueStr == "true" || valueStr == "1" || valueStr == "on")
+            {
+                result = true;
+                return true;
+            }
+            if (valueStr == "false" || valueStr == "0" || valueStr == "off")
+            {
+                result = false;
+                return true;
+            }
+            result = false;
+            return false;
+        }
+
 
         private void FindAndAddTfToManager(string path)
         {
@@ -1128,7 +1372,11 @@ namespace HopeTools
             {
                 command = command.Substring(1).Trim();
             }
-            PrintLine(_pre_cmd + command);
+            if(string.IsNullOrEmpty(command))
+            {
+                PrintLine(_pre_cmd + command);
+                return;
+            }
             clear_cmdline();
             AddCommandToHistory(command);
             ProcessCommand(command);
@@ -1145,8 +1393,106 @@ namespace HopeTools
                 {
                     InputCommand(command);
                 }
+                cmd_line.text = ">";
             }
         }
+
+        // 环形缓冲区历史命令系统
+        private string[] historyCmd;
+        [SerializeField] public int historyMaxLines = 50;
+        private int historyCurrentIndex = 0;  // 当前写入位置
+        private int historySize = 0;          // 历史记录实际数量
+        private int historyNavigateIndex = 0; // 导航时的当前索引
+        private bool isNavigatingHistory = false; // 是否正在浏览历史
+
+        // 初始化历史命令缓冲区
+        private void InitializeHistory()
+        {
+            if (historyCmd == null || historyCmd.Length != historyMaxLines)
+            {
+                historyCmd = new string[historyMaxLines];
+                historyCurrentIndex = 0;
+                historySize = 0;
+                historyNavigateIndex = 0;
+                isNavigatingHistory = false;
+            }
+        }
+
+        private void AddCommandToHistory(string command)
+        {
+            if (string.IsNullOrEmpty(command)) return;            
+            // 确保历史缓冲区已初始化
+            InitializeHistory();            
+            // 添加到环形缓冲区
+            historyCmd[historyCurrentIndex] = command;
+            historyCurrentIndex = (historyCurrentIndex + 1) % historyMaxLines;            
+            // 更新历史记录数量
+            if (historySize < historyMaxLines)
+            {
+                historySize++;
+            }            
+            // 重置导航状态
+            isNavigatingHistory = false;
+            historyNavigateIndex = historyCurrentIndex;
+        }
+
+        public void OnCmdLineUpArrow()
+        {
+            if (cmd_line == null || historySize == 0) return;
+
+            if (!isNavigatingHistory)
+            {
+                // 开始导航历史，从最新的一条开始
+                isNavigatingHistory = true;
+                historyNavigateIndex = historyCurrentIndex == 0 ? historySize - 1 : historyCurrentIndex - 1;
+            }
+            else
+            {
+                // 继续向上导航
+                int prevIndex = (historyNavigateIndex - 1 + historyMaxLines) % historyMaxLines;
+                
+                // 检查是否已经到达最早的历史记录
+                if (historySize < historyMaxLines && prevIndex >= historySize - 1)
+                {
+                    // 到达最早记录，保持在第一条
+                    historyNavigateIndex = 0;
+                }
+                else if (historySize == historyMaxLines && prevIndex == (historyCurrentIndex - 1 + historyMaxLines) % historyMaxLines)
+                {
+                    // 环形缓冲区已满且到达最早记录
+                    cmd_line.text = ">";
+                    return;
+                }
+                else
+                {
+                    historyNavigateIndex = prevIndex;
+                }
+            }            
+            // 显示历史命令
+            cmd_line.text = ">" + historyCmd[historyNavigateIndex];
+        }
+
+        public void OnCmdLineDownArrow()
+        {
+            if (cmd_line == null || historySize == 0 || !isNavigatingHistory) return;
+
+            // 计算下一条历史记录的索引
+            int nextIndex = (historyNavigateIndex + 1) % historyMaxLines;
+
+            // 检查是否已经回到当前输入位置
+            if (nextIndex == historyCurrentIndex || (historySize < historyMaxLines && nextIndex >= historySize))
+            {
+                // 回到当前输入，清空导航状态
+                isNavigatingHistory = false;
+                cmd_line.text = ">";
+                return;
+            }
+
+            historyNavigateIndex = nextIndex;
+            cmd_line.text = ">" + historyCmd[historyNavigateIndex];
+        }
+
+
 
         public void clear_cmdline()
         {
@@ -1160,14 +1506,11 @@ namespace HopeTools
         {
             Debug.Log($"-------------- shell [{System.DateTime.Now}] {message}");
         }
-
-
         #region toekng get 
 
 
         #endregion
-
-                #region Screen Methods extern API
+         #region Screen Methods extern API
         public HopeShellScreen _screen;
         private void PrintLine(string text)
         {

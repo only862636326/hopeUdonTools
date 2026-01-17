@@ -25,7 +25,6 @@ namespace HopeTools
             // 头部前方偏移
             target.position = head_p + head_r * Vector3.forward * frontOffset;
             target.rotation = head_r;
-
         }
     }
 }

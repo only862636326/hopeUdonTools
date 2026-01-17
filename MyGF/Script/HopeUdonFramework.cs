@@ -53,7 +53,10 @@ namespace HopeTools
             udonEvn.Init();
             udonPool.Init();
             udonIoc.Init();
-            udonEvnRe.Init();
+            if (udonEvnRe != null)
+            {
+                udonEvnRe.Init();
+            }
             // 初始化事件系统
             if (udonEvn != null)
             {
