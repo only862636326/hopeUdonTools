@@ -317,8 +317,18 @@ MonoBehaviour:
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes: []
+    SerializationNodes:
+    - Name: eventData
+      Entry: 6
+      Data: 
+    - Name: eventData1
+      Entry: 6
+      Data: 
+    - Name: eventData2
+      Entry: 6
+      Data: 
   _udonSharpBackingUdonBehaviour: {fileID: 237207163}
+  hugf: {fileID: 0}
 --- !u!65 &237207165
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1924,6 +1934,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2381310950926283097, guid: bb4051f1c6d001d4f9b74d3ddc76045f,
         type: 3}
+    - target: {fileID: 3011307223966565414, guid: bb4051f1c6d001d4f9b74d3ddc76045f,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3327401041902425741, guid: bb4051f1c6d001d4f9b74d3ddc76045f,
         type: 3}
       propertyPath: serializationData.Prefab
@@ -2003,6 +2018,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 4992056026969004285, guid: bb4051f1c6d001d4f9b74d3ddc76045f,
         type: 3}
+    - target: {fileID: 5618422572751371630, guid: bb4051f1c6d001d4f9b74d3ddc76045f,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5917926919183650007, guid: bb4051f1c6d001d4f9b74d3ddc76045f,
         type: 3}
       propertyPath: serializationData.Prefab
@@ -2445,6 +2465,7 @@ MonoBehaviour:
   currentlyHeldBy: {fileID: 0}
   pickupable: 1
   proximity: 2
+  version: 0
 --- !u!54 &937858607
 Rigidbody:
   m_ObjectHideFlags: 0

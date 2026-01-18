@@ -71,6 +71,7 @@ namespace HopeTools
                 PrintLine("HopeShell Forbig mode : " + (_is_forbig ? "ON" : "OFF"));
             }
             Networking.LocalPlayer.Immobilize(_is_forbig);
+            Networking.LocalPlayer.SetJumpImpulse(!_is_forbig ? 3.0f : 0.0f);
         }
 
  
@@ -1372,9 +1373,9 @@ namespace HopeTools
             {
                 command = command.Substring(1).Trim();
             }
+            PrintLine(_pre_cmd + command);
             if(string.IsNullOrEmpty(command))
             {
-                PrintLine(_pre_cmd + command);
                 return;
             }
             clear_cmdline();

@@ -23,19 +23,17 @@ namespace HopeTools
     {
         // Start is called before the first frame update
 
-        public GameObject op_obg;
-        public GameObject tar_udon_obj;
+        static public GameObject op_obg;
+        static public GameObject tar_udon_obj;
         static public string scr_script;
         public string _scr_path;
         private const string SESSION_KEY = "ToggleEvnScriptPathEditor_ScriptPath";
-
-
         SetToggleEvn()
         {
-            this.titleContent = new GUIContent("ÉèÖÃToggleUdonÊÂ¼ş");
+            this.titleContent = new GUIContent("è®¾ç½®ToggleUdonäº‹ä»¶");
         }
 
-        [MenuItem("HopeTools/ÉèÖÃToggleUdonÊÂ¼ş")]
+        [MenuItem("HopeTools/è®¾ç½®ToggleUdonäº‹ä»¶")]
         static void ShowSetToggleEvn()
         {
             EditorWindow.GetWindow(typeof(SetToggleEvn));
@@ -43,15 +41,13 @@ namespace HopeTools
 
         private void OnEnable()
         {
-            // ´Ó SessionState ¼ÓÔØÂ·¾¶
             _scr_path = EditorPrefs.GetString(SESSION_KEY, "");
         }
 
         private void OnDisable()
         {
-            EditorPrefs.SetString(SESSION_KEY, _scr_path);
+            EditorPrefs.SetString(SESSION_KEY, _scr_path);            
         }
-
 
         private void OnGUI()
         {
@@ -60,24 +56,24 @@ namespace HopeTools
 
             SessionState.SetString(SESSION_KEY, _scr_path);
 
-
-            op_obg = (GameObject)EditorGUILayout.ObjectField("²Ù×÷¶ÔÏó", op_obg, typeof(GameObject), true);
-            tar_udon_obj = (GameObject)EditorGUILayout.ObjectField("Ä¿±êUdon", tar_udon_obj, typeof(GameObject), true);
-            // ½Å±¾Â·¾­
+            op_obg = (GameObject)EditorGUILayout.ObjectField("æ“ä½œå¯¹è±¡", op_obg, typeof(GameObject), true);
+            tar_udon_obj = (GameObject)EditorGUILayout.ObjectField("ç›®æ ‡Udon", tar_udon_obj, typeof(GameObject), true);
+            // è„šæœ¬è·¯ç»
             GUILayout.Space(10);
             SessionState.SetString(SESSION_KEY, _scr_path);
-            _scr_path = EditorGUILayout.TextField("½Å±¾Â·¾¶", _scr_path);
-            if (GUILayout.Button("Ñ¡Ôñ½Å±¾"))
+            _scr_path = EditorGUILayout.TextField("è„šæœ¬è·¯å¾„", _scr_path);
+            if (GUILayout.Button("é€‰æ‹©è„šæœ¬"))
             {
+                string defaultPath = !string.IsNullOrEmpty(_scr_path) ? System.IO.Path.GetDirectoryName(_scr_path) : Application.dataPath;
                 _scr_path = EditorUtility.OpenFilePanel(
-                    "Ñ¡Ôñ½Å±¾ÎÄ¼ş",
-                    Application.dataPath,
+                    "é€‰æ‹©è„šæœ¬æ–‡ä»¶",
+                    defaultPath,
                     "cs");
                 SessionState.SetString(SESSION_KEY, _scr_path);
             }
 
             GUILayout.Space(10);
-            if (GUILayout.Button("ÉèÖÃÊÂ×ÓÎïÌåudon Evn"))
+            if (GUILayout.Button("è®¾ç½®äº‹å­ç‰©ä½“udon Evn, å¸¦åç¼€"))
             {
                 if (op_obg != null)
                 {
@@ -100,8 +96,7 @@ namespace HopeTools
                 }
             }
 
-            GUILayout.Space(10);
-            if (GUILayout.Button("ÉèÖÃudon Evn, ²»´øºó×º"))
+            if (GUILayout.Button("è®¾ç½®udon Evn, ä¸å¸¦åç¼€"))
             {
                 if (op_obg != null)
                 {
@@ -110,7 +105,7 @@ namespace HopeTools
                     for (int i = 0; i < op_obg.transform.childCount; i++)
                     {
                         var g = op_obg.transform.GetChild(i).transform;
-                        var tarudon = (UdonSharpBehaviour)GameObject.Find("Hugf").GetComponentInChildren<HopeUdonEvnApi>();
+                        var tarudon = tar_udon_obj.GetComponent<UdonSharpBehaviour>();
 
                         var targetToggle = g.GetComponent<Toggle>();
                         SetTogleHufgEvn(targetToggle, tarudon);
@@ -119,6 +114,33 @@ namespace HopeTools
                         foreach (var t in tar_s)
                         {
                             SetTogleHufgEvn(t, tarudon);
+                        }
+                    }
+                }
+            }
+
+            GUILayout.Space(10);
+            if (GUILayout.Button("æ¸…é™¤å­ä¸€å±‚åç¼€"))
+            {
+                if (op_obg != null)
+                {
+                    for (int i = 0; i < op_obg.transform.childCount; i++)
+                    {
+                        var g = op_obg.transform.GetChild(i).transform;
+                        if (g == null)
+                            return;
+
+                        var ss = g.name.Split('_');
+                        if (int.TryParse(ss[ss.Length - 1], out var idx))
+                        {
+                            var _n = ss[0];
+                            for (int j = 1; j < ss.Length - 1; i++)
+                            {
+                                _n = _n + "_" + ss[j];
+                            }
+                            g.name = _n;
+                            EditorUtility.SetDirty(g);
+                            EditorUtility.DisplayDialog("æç¤º", "å®Œæˆ", "ok");
                         }
                     }
                 }
@@ -166,16 +188,16 @@ namespace HopeTools
         }
 
 
-        // ÒÆ³ıÖ¸¶¨Ä¿±ê¶ÔÏóºÍ·½·¨ÃûµÄ³Ö¾Ã»¯¼àÌıÆ÷
+        // ç§»é™¤æŒ‡å®šç›®æ ‡å¯¹è±¡å’Œæ–¹æ³•åçš„æŒä¹…åŒ–ç›‘å¬å™¨
         public static void UnregisterPersistentListener(UnityEventBase unityEvent)
         {
             if (unityEvent == null)
                 return;
 
-            // »ñÈ¡³Ö¾Ã»¯¼àÌıÆ÷µÄÊıÁ¿
+            // è·å–æŒä¹…åŒ–ç›‘å¬å™¨çš„æ•°é‡
             int count = unityEvent.GetPersistentEventCount();
 
-            // ±éÀúËùÓĞ³Ö¾Ã»¯¼àÌıÆ÷
+            // éå†æ‰€æœ‰æŒä¹…åŒ–ç›‘å¬å™¨
             for (int i = count - 1; i >= 0; i--)
             {
                 UnityEventTools.RemovePersistentListener(unityEvent, i);
@@ -184,27 +206,17 @@ namespace HopeTools
 
         public static void AddMethodWithoutRoslyn(string scriptPath, string newMethod)
         {
-            //scriptPath = @"D:/VR_C/VrcDayDark__2505/Assets/HopeTools/MyGF/HopeUdonEvnApi.cs";
-            //string newMethod = "asdfsafds";
-            //if (scriptPath == null)
-            //{
-            //    scriptPath = EditorUtility.OpenFilePanel(
-            //        "Ñ¡Ôñ½Å±¾ÎÄ¼ş",
-            //        Application.dataPath,
-            //        "cs");
-            //}
-
             if (string.IsNullOrEmpty(scriptPath))
                 return;
 
             try
             {
                 Debug.Log(scriptPath);
-                // ¶ÁÈ¡Ô­Ê¼´úÂë
+                // è¯»å–åŸå§‹ä»£ç 
                 string code = File.ReadAllText(scriptPath);
                 Debug.Log(code);
 
-                var s_name = $"public void {newMethod}()"; 
+                var s_name = $"public void {newMethod}()";
                 if (code.Contains(s_name))
                 {
                     return;
@@ -221,10 +233,10 @@ namespace HopeTools
                             _new = _new + "_" + ss[i];
                         }
 
-                        // µ¹ÊıµÚ¶ş²¿·ÖÊÇ ×ÖÄ¸+Êı×Ö µÄÇé¿ö eg : ButtonEvn12_34  , add fun ButtonEvn(12, 34)
+                        // å€’æ•°ç¬¬äºŒéƒ¨åˆ†æ˜¯ å­—æ¯+æ•°å­— çš„æƒ…å†µ eg : ButtonEvn12_34  , add fun ButtonEvn(12, 34)
 
                         var ss2 = ss[ss.Length - 2];
-                        // ÕÒµ½×ÖÄ¸ºÍÊı×ÖµÄ·Ö½çµã
+                        // æ‰¾åˆ°å­—æ¯å’Œæ•°å­—çš„åˆ†ç•Œç‚¹
                         int splitIndex = ss2.Length;
                         for (int i = ss2.Length - 1; i >= 0; i--)
                         {
@@ -251,27 +263,26 @@ namespace HopeTools
                             s_name = $"public void {newMethod}() {{ {_new}({idx}); }}\r\n";
                         }
                     }
-                    
 
                     else
                     {
-                        s_name = $"public void {newMethod}() \r\n{{ \r\n; \r\n}}\r\n";
+                        s_name = $"public void {newMethod}() \r\n{{ \r\n //hugf.Log(\"{newMethod}\"); \r\n}}\r\n";
                     }
                 }
 
-                // Ê¹ÓÃÕıÔò±í´ïÊ½ÕÒµ½ÀàµÄ½áÊø»¨À¨ºÅ
+                // ä½¿ç”¨æ­£åˆ™è¡¨è¾¾å¼æ‰¾åˆ°ç±»çš„ç»“æŸèŠ±æ‹¬å·
                 string pattern = "// end method";
                 string updatedCode = Regex.Replace(code, pattern, s_name +"\t\t"+ pattern);
 
-                //// ±£´æĞŞ¸ÄºóµÄ´úÂë
+                //// ä¿å­˜ä¿®æ”¹åçš„ä»£ç 
                 File.WriteAllText(scriptPath, updatedCode);
                 AssetDatabase.Refresh();
 
-                Debug.Log("·½·¨ÒÑÌí¼Óµ½½Å±¾");
+                Debug.Log("æ–¹æ³•å·²æ·»åŠ åˆ°è„šæœ¬");
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"Ìí¼Ó·½·¨Ê§°Ü: {e.Message}");
+                Debug.LogError($"æ·»åŠ æ–¹æ³•å¤±è´¥: {e.Message}");
             }
         }
     }

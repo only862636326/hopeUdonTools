@@ -19,10 +19,10 @@ namespace HopeTools
 
         FixAdd()
         {
-            this.titleContent = new GUIContent("FixAddTool");
+            this.titleContent = new GUIContent("排列、重命名");
         }
 
-        [MenuItem("HopeTools/FixAdd")]
+        [MenuItem("HopeTools/排列、重命名")]
         static void ShowFixAdd()
         {
             EditorWindow.GetWindow(typeof(FixAdd));
