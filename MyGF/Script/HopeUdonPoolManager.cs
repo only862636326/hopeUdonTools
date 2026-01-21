@@ -6,6 +6,7 @@ using VRC.Udon;
 
 namespace HopeTools
 {
+    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class HopeUdonPoolManager : UdonSharpBehaviour
     {
         public HopeUdonFramework hugf;

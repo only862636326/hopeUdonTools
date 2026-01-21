@@ -73,6 +73,10 @@ namespace HopeTools
 
         public void AddEvnString(string s)
         {
+            if (!_is_recording)
+            {
+                return;
+            }
             // 检查是否需要扩容
             if (_evn_index >= evn_list.Length)
             {
@@ -88,9 +92,20 @@ namespace HopeTools
         {
             AddEvnString(evn_name);
         }
+        private bool _is_recording = true;
+        public void StopReEvn()
+        {
+            _is_recording = false;
+        }
+
+        public void StartReEvn()
+        {
+            _is_recording = true;
+        }
 
         public void AddEvnWithDat(string evn_name, object data)
         {
+            
             AddEvnString(evn_name + "|" + data.ToString());
         }
 
@@ -108,12 +123,12 @@ namespace HopeTools
                 {
                     return; // 暂停，不触发事件
                 }
-
                 // 触发当前事件
-                ApiTrgCmdEvn(_pre_run_index, evn_list[_pre_run_index]);
 
                 // 移动到下一个事件
+                ApiTrgCmdEvn(_pre_run_index, evn_list[_pre_run_index]);
                 _pre_run_index++;
+                ApiSendUiCmd("SetPreEvn", _pre_run_index.ToString());
             }
             else
             {
@@ -126,6 +141,7 @@ namespace HopeTools
             if (idx >= 0 && idx < _evn_index)
             {
                 _pre_run_index = idx;
+                this.StopAutoTrigger();
                 ApiSendUiCmd("SetPreEvn", _pre_run_index.ToString());
             }
         }
@@ -214,7 +230,9 @@ namespace HopeTools
         {
             //LogMsg("ApiUIItemShowCmd: " + idx + " " + s);
             if (hopeUdonEvnUi != null)
+            {
                 hopeUdonEvnUi.ShowItemInfo(idx, s);
+            }
         }
 
         public void ApiShowUiInfo(string s)
@@ -232,6 +250,11 @@ namespace HopeTools
         public void ApiTrgCmdEvn(int evn_idx, string evn_name)
         {
             //LogMsg(evn_idx.ToString() + "---ApiTrgCmdEvn: " + evn_name);
+            if (evn_name == null || evn_name.Length == 0)
+            {
+                LogMsg("ApiTrgCmdEvn: evn_name 为空");
+                return;
+            }
 
             var ss = evn_name.Split('|');
             var _name = ss[0];
@@ -254,15 +277,108 @@ namespace HopeTools
             {
                 LogMsg("ApiTrgCmdEvn: " + evn_name + " 格式错误");
             }
-            ApiSendUiCmd("SetPreEvn", evn_idx.ToString());
+        }
+
+        public void EvnReRevCmd(string cmd , object param)
+        {
+            if (cmd == "TrgNextEvn")
+            {
+                TrgNextEvn();
+            }
+            else if (cmd == "ResetEvn")
+            {
+                ResetEvn();
+            }
+            else if (cmd == "PauseEvn")
+            {
+                PauseEvn();
+            }
+            else if (cmd == "ResumeEvn")
+            {
+                ResumeEvn();
+            }
+            else if (cmd == "AutoTigEvn")
+            {
+                AutoTigEvn();
+            }
+            else if (cmd == "StopAutoTrigger")
+            {
+                StopAutoTrigger();
+            }
+            else if (cmd == "StopReEvn")
+            {
+                StopReEvn();
+            }
+            else if (cmd == "StartReEvn")
+            {
+                StartReEvn();
+            }
         }
 
         public void LogMsg(string msg)
         {
             Debug.Log(msg);
         }
+
+        public string GetAllEvn()
+        {
+            var s = "";
+            for (int i = 0; i < _evn_index; i++)
+            {
+                s += evn_list[i] + "\n";
+            }
+            return s;
+        }
+
+        private string[] _all_evn_ss;
+        private int _all_evn_idx;
+        private float _last_exit_time;
+        private int _line_count = 2;
+        public void AddLoop()
+        {
+            var _add_limit = _line_count;
+
+            while (_all_evn_idx < _all_evn_ss.Length)
+            {
+                if (_line_count > 0)
+                {
+                    var evn = _all_evn_ss[_all_evn_idx].Trim();
+                    if (evn.Length > 0)
+                        AddEvnString(evn);
+                    _all_evn_idx++;
+                    _add_limit--;
+                }
+                if (_add_limit <= 0)
+                {
+                    // 33 frames per second, 1 frame 大约 0.03 秒
+                    if (Time.time - _last_exit_time > 0.03f)
+                    {
+                        _line_count--;
+                    }
+                    else
+                    {
+                        _line_count++;
+                    }
+                    _last_exit_time = Time.time;
+                    this.SendCustomEventDelayedFrames(nameof(AddLoop), 1);
+                    return;
+                }
+            }
+        }
+
+        public void SetAllEvn(string all_evn_str)
+        {
+            ClearEvn();
+            _all_evn_ss = all_evn_str.Split('\n');
+            _all_evn_idx = 0;
+            AddLoop();
+        }
     }
 }
+
+
+
+
 
 
 

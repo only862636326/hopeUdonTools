@@ -1,6 +1,8 @@
 ﻿
+using System.Linq;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.UI;
 using VRC.SDKBase;
 using VRC.Udon;
 
@@ -17,23 +19,28 @@ namespace HopeTools
         public const int max_item_num = 50;
         public GameObject _list_item_pre; // perfab for list item
 
-        private GameObject[] itemgameObjList;
-        private Transform[] itemManagerTfList;
-
+        private Transform[] itemgameObjList;
+        [SerializeField] private Transform[] itemManagerTfList;
+        
+        private Toggle[] _toggle_name_list;
+        private Toggle[] _toggle_icon_list;
         private bool[] _toggle_is_on_name_list;
         private int[] _prt_idx_list;
 
-        public Transform managed_root_list;
+        public Transform managed_root;
+        public Transform active_tf;
         private bool _is_init = false;
         public int item_show_num = 0;
 
         private Vector3 icon_p_base;
         private Vector3 name_p_base;
 
+        public HopeUnityGameObjCompnet hopeUnityGameObj;
+
         // 初始化
         void Start()
         {
-            Init();
+            this.SendCustomEventDelayedFrames(nameof(this.Init), 1);
         }
         public void Init()
         {
@@ -42,26 +49,34 @@ namespace HopeTools
             this._is_init = true;
 
             // 初始化 itemgameObjList
-            this.itemgameObjList = new GameObject[max_item_num];
+            this.itemgameObjList = new Transform[max_item_num];
             _toggle_is_on_name_list = new bool[max_item_num];
             _prt_idx_list = new int[max_item_num];
             itemManagerTfList = new Transform[max_item_num];
+            _toggle_name_list = new Toggle[max_item_num];
+            _toggle_icon_list = new Toggle[max_item_num];
 
             var prt = _list_item_pre.transform.parent;
 
-
             for (int i = 0; i < itemgameObjList.Length; i++)
             {
-                itemgameObjList[i] = Instantiate(_list_item_pre, prt);
-                itemgameObjList[i].SetActive(false);
+                itemgameObjList[i] = Instantiate(_list_item_pre, prt).transform;
+                itemgameObjList[i].gameObject.SetActive(false);
+                //itemManagerTfList[i] = itemgameObjList[i].transform;
+                _toggle_name_list[i] = itemgameObjList[i].transform.Find(CONFIG_STRING_NAME).GetComponent<UnityEngine.UI.Toggle>();
+                _toggle_icon_list[i] = itemgameObjList[i].transform.Find(CONFIG_STRING_ICON).GetComponent<UnityEngine.UI.Toggle>();
+                _toggle_name_list[i].isOn = false;
             }
 
             name_p_base = itemgameObjList[0].transform.Find(CONFIG_STRING_NAME).localPosition;
             icon_p_base = itemgameObjList[0].transform.Find(CONFIG_STRING_ICON).localPosition;
 
             Destroy(_list_item_pre);
-
             UpdateItemList();
+
+            _toggle_name_list[0].isOn = true;
+            _toggle_is_on_name_list[0] = true;
+            itemgameObjList[0].GetChild(1).gameObject.SetActive(true);
         }
 
         void Update()
@@ -74,15 +89,29 @@ namespace HopeTools
             ;
         }
 
+        private int _pre_active_idx = 0;
         public void OnToggleValueChanged_Name()
         {
-            // LogMessge("OnToggleValueChanged_Name");
+            if (_toggle_is_on_name_list[_pre_active_idx] != _toggle_name_list[_pre_active_idx].isOn)
+            {
+                _toggle_is_on_name_list[_pre_active_idx] = _toggle_name_list[_pre_active_idx].isOn;
+                itemgameObjList[_pre_active_idx].GetChild(1).gameObject.SetActive(true);
+                return;
+            }
             for (int i = 0; i < item_show_num; i++)
             {
-                if (_toggle_is_on_name_list[i] != itemgameObjList[i].transform.Find(CONFIG_STRING_NAME).GetComponent<UnityEngine.UI.Toggle>().isOn)
+                if (_toggle_name_list[i].isOn != _toggle_is_on_name_list[i])
                 {
-                    _toggle_is_on_name_list[i] = itemgameObjList[i].transform.Find(CONFIG_STRING_NAME).GetComponent<UnityEngine.UI.Toggle>().isOn;
-                    //LogMessge("OnToggleValueChanged_Name " + i + " " + itemgameObjList[i].name);
+                    itemgameObjList[_pre_active_idx].GetChild(1).gameObject.SetActive(false);
+                    _pre_active_idx = i;
+                    itemgameObjList[_pre_active_idx].GetChild(1).gameObject.SetActive(true);
+
+                    _toggle_name_list[_pre_active_idx].isOn = false;
+                    this.active_tf = itemManagerTfList[_pre_active_idx];
+                    if (hopeUnityGameObj != null)
+                        hopeUnityGameObj.InitActiveTf(this.active_tf);
+                    LogMessge("OnToggleValueChanged_Name " + _pre_active_idx);
+                    break;
                 }
             }
         }
@@ -95,7 +124,7 @@ namespace HopeTools
                 return true;
             }
 
-            if (itemgameObjList[idx].transform.Find("ToggleIcom").GetComponent<UnityEngine.UI.Toggle>().isOn == false)
+            if (_toggle_icon_list[idx].isOn == false)
             {
                 return false;
             }
@@ -113,12 +142,12 @@ namespace HopeTools
             {
                 if (CheckIsActive(_prt_idx_list[i]))
                 {
-                    itemgameObjList[i].SetActive(true);
+                    itemgameObjList[i].gameObject.SetActive(true);
                     _show_idx++;
                 }
                 else
                 {
-                    itemgameObjList[i].SetActive(false);
+                    itemgameObjList[i].gameObject.SetActive(false);
                 }
             }
         }
@@ -126,7 +155,7 @@ namespace HopeTools
         public void UpdateItemList()
         {
             this.item_show_num = 0;
-            AddChildToManagedList(managed_root_list, 0, -1);
+            AddChildToManagedList(managed_root, 0, -1);
         }
 
         [RecursiveMethod]
@@ -138,7 +167,7 @@ namespace HopeTools
             var s = "  " + tf.name;
             var item = this.itemgameObjList[this.item_show_num];
             
-            item.SetActive(true);
+            item.gameObject.SetActive(true);
             item.name = s;
             var text = item.transform.Find(CONFIG_STRING_NAME).GetChild(0).GetComponent<UnityEngine.UI.Text>();
             text.text = s;

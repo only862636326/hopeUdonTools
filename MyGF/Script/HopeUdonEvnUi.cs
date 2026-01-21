@@ -20,21 +20,32 @@ namespace HopeTools
         {
             item_perferb.SetActive(false);
             item_list = new Transform[CONFIG_DEFAULT_LIST_SIZE];
+
         }
 
         public void Update()
         {
             // shift + F5 reset / run   
-            if(Input.GetKeyDown(KeyCode.F5))
+            if (Input.GetKeyDown(KeyCode.F5))
             {
-                if(Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+                if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
                 {
-                    ToggleEvn_ResetRun();
+                    ToggleEvn_Stop();
                 }
+                else if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+                {
+                    ToggleEvn_Reset();
+                }
+
                 else
                 {
                     ToggleEvn_Run();
                 }
+            }
+
+            if (Input.GetKeyDown(KeyCode.F11))
+            {
+                ToggleEvn_Next();
             }
         }
 
@@ -106,9 +117,15 @@ namespace HopeTools
                 new_item.SetParent(item_perferb.transform.parent, false);
                 item_list[idx] = new_item;
             }
-            item_list[idx].Find("ToggletEvnIdx").GetComponentInChildren<Text>().text = idx.ToString();
-            item_list[idx].GetComponentInChildren<InputField>().text = _evn;
+            item_list[idx].GetChild(0).GetChild(0).GetComponent<Text>().text = idx.ToString();
+            item_list[idx].GetChild(1).GetComponent<InputField>().text = _evn;
             item_list[idx].gameObject.SetActive(true);
+        }
+
+        string[] evn_list;
+        public void ShowItemInfoV2(int idx, string _evn)
+        {
+            ;
         }
 
         public void SetNextItemDisable(int idx)
@@ -134,24 +151,30 @@ namespace HopeTools
         [HideInInspector] public HopeTools.HopeUdonFramework hugf;
         public HopeTools.HopeUdonEvnRe udonEvnRe;
         // start method
+        public void ToggleEvn_Next()
+        {
+            //hugf.Log("ToggleEvn_Next");
+            udonEvnRe.TrgNextEvn();
+        }
 
         public void ToggleEvn_Run()
         {
-            hugf.Log("ToggleEvn_Run");
+            //hugf.Log("ToggleEvn_Run");
             udonEvnRe.AutoTigEvn();
         }
         public void ToggleEvn_Stop()
         {
-            hugf.Log("ToggleEvn_Stop");
+            //hugf.Log("ToggleEvn_Stop");
+            udonEvnRe.StopAutoTrigger();
         }
         public void ToggleEvn_Clear()
         {
+            //hugf.Log("ToggleEvn_Clear");
             udonEvnRe.ClearEvn();
-            hugf.Log("ToggleEvn_Clear");
         }
         public void ToggleEvn_Reset()
         {
-            hugf.Log("ToggleEvn_Reset");
+            //hugf.Log("ToggleEvn_Reset");
             udonEvnRe.SetTrg(0);
         }
         public void ToggleEvn_ResetRun()
@@ -160,6 +183,50 @@ namespace HopeTools
             ToggleEvn_Reset();
             ToggleEvn_Run();
         }
+
+        public InputField evn_all_inputfield;
+        public void ToggleEvn_GetAllEvn()
+        {
+            //hugf.Log("ToggleEvn_GetAllEvn");
+            if (evn_all_inputfield == null)
+                return;
+            var s = udonEvnRe.GetAllEvn();
+            evn_all_inputfield.text = s;
+        }
+        public void ToggleEvn_SetAllEvn()
+        {
+            if (evn_all_inputfield == null)
+                return;
+            //hugf.Log("ToggleEvn_SetAllEvn");
+            udonEvnRe.SetAllEvn(evn_all_inputfield.text);
+        }
+
+        public void ToggleEvn_SetPre()
+        {
+            //hugf.Log("ToggleEvn_SetPre");
+        }
+        public void ToggleEvn_SelectIdx()
+        {
+            //hugf.Log("ToggleEvn_SelectIdx"); 
+        }
+        public void ToggleEvn_RunIdx()
+        {
+            //hugf.Log("ToggleEvn_RunIdx"); 
+        }
+        public void ToggleEvn_SetStop()
+        {
+            //hugf.Log("ToggleEvn_SetStop"); 
+        }
+
+        public void ToggleEvn_StartRe()
+        {
+            udonEvnRe.EvnReRevCmd("StartReEvn", null);
+        }
+        public void ToggleEvn_StopRe()
+        {
+            udonEvnRe.EvnReRevCmd("StopReEvn", null);
+        }
+
         // end method
 
 
@@ -173,10 +240,13 @@ namespace HopeTools
             var tf = this.item_list[evn_idx];
             if (tf != null)
             {
-                tf.Find("TogglePre").GetComponent<Toggle>().isOn = true;
+                tf.Find("ToggleEvn_SetPre").GetComponent<Toggle>().isOn = true;
             }
         }
     }
 }
+
+
+
 
 

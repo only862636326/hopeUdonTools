@@ -4,12 +4,18 @@ v260114
     - 修复init未set hugf的错误
 v260116
     - 开始开发事件记录回放系统
+	
 v260117 udon unity
     - ui 重新制作
     - cmd udon 解析 
     - cmd history 记录
+	
 v260118 udon hufg
 	- 事件回放系统完善，完成简易demo
+	
+v260121 udon unity
+	-  componet拆分为单个udon
+	-  hierarchy inspector关联
 
 
 

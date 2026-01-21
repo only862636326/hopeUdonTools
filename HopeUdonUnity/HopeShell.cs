@@ -73,9 +73,7 @@ namespace HopeTools
             Networking.LocalPlayer.Immobilize(_is_forbig);
             Networking.LocalPlayer.SetJumpImpulse(!_is_forbig ? 3.0f : 0.0f);
         }
-
- 
-
+       
         private void ProcessCommand(string command)
         {
             if (string.IsNullOrWhiteSpace(command)) return;

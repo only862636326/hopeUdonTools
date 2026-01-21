@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 9135539247727082065}
   - component: {fileID: 3848178974159685161}
   m_Layer: 17
-  m_Name: TogglePre
+  m_Name: ToggleEvn_SetPre
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -86,7 +86,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Highlighted
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 3848178974159685161}
   toggleTransition: 1
   graphic: {fileID: 0}
@@ -545,7 +545,7 @@ GameObject:
   - component: {fileID: 6031756969856139139}
   - component: {fileID: 2684353457939095077}
   m_Layer: 17
-  m_Name: TextEvnIdx
+  m_Name: ToggleEvn_SelectIdx
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -847,11 +847,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 7585276479149671807}
   - {fileID: 747269997657564569}
+  - {fileID: 4109031840572037391}
+  - {fileID: 7585276479149671807}
   - {fileID: 1402511503686972194}
   - {fileID: 5805424188324462307}
-  - {fileID: 4109031840572037391}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -910,12 +910,12 @@ GameObject:
   - component: {fileID: 5711236595719956869}
   - component: {fileID: 1186925891747818912}
   m_Layer: 17
-  m_Name: ToggleRun
+  m_Name: ToggleEvn_RunIdx
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1402511503686972194
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1051,7 +1051,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4870613469793253970
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1126,7 +1126,7 @@ GameObject:
   - component: {fileID: 61180160443285718}
   - component: {fileID: 4935071514597413053}
   m_Layer: 17
-  m_Name: ToggleStop
+  m_Name: ToggleEvn_SetStop
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1219,7 +1219,7 @@ MonoBehaviour:
           m_StringArgument: OnToggleValueChanged_Icon
           m_BoolArgument: 0
         m_CallState: 2
-  m_IsOn: 1
+  m_IsOn: 0
 --- !u!114 &4935071514597413053
 MonoBehaviour:
   m_ObjectHideFlags: 0
