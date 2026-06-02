@@ -42,7 +42,6 @@ namespace HopeTools
         }
 
 
-
         /// <summary>
         /// 初始化数组
         /// </summary>
@@ -92,7 +91,6 @@ namespace HopeTools
         }
 
 
-
         /// <summary>
         /// 查找服务索引
         /// </summary>
@@ -107,7 +105,6 @@ namespace HopeTools
             }
             return -1;
         }
-
 
 
         /// <summary>

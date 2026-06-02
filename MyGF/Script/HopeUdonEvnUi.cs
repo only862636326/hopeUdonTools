@@ -20,7 +20,6 @@ namespace HopeTools
         {
             item_perferb.SetActive(false);
             item_list = new Transform[CONFIG_DEFAULT_LIST_SIZE];
-
         }
 
         public void Update()
@@ -101,6 +100,7 @@ namespace HopeTools
             }
         }
 
+
         public void ShowItemInfo(int idx, string _evn)
         {
             if (idx < 0 || idx >= CONFIG_MAX_ITEM_COUNT)
@@ -119,8 +119,48 @@ namespace HopeTools
             }
             item_list[idx].GetChild(0).GetChild(0).GetComponent<Text>().text = idx.ToString();
             item_list[idx].GetChild(1).GetComponent<InputField>().text = _evn;
-            item_list[idx].gameObject.SetActive(true);
+            // item_list[idx].gameObject.SetActive(true);
+            this._set_idx = idx;
+            SetActiveDelay();
         }
+
+        float _last_time = 0.0f;
+        float _delay_time = 0.5f;
+        int _idx_last = -1;
+        int _set_idx = 0;
+        int _set_task_flag = 0;
+
+        public void SetActiveHelp()
+        {
+            for (int i = _idx_last + 1; i <= _set_idx; i++)
+            {
+                if (item_list[i] == null) break;
+                if (!item_list[i].gameObject.activeSelf)
+                    item_list[i].gameObject.SetActive(true);
+            }
+            _idx_last = _set_idx;
+            _set_task_flag = 0;
+        }
+
+        public void SetActiveDelay()
+        {
+            if(_set_task_flag == 1)
+            {
+                return;
+            }
+
+            float now_time = Time.time;
+            if (now_time - _last_time < 0.1f)
+            {
+                _set_task_flag = 1;
+                this.SendCustomEventDelayedSeconds(nameof(SetActiveHelp), _delay_time);
+            }
+            else{
+                SetActiveHelp();
+            }
+            _last_time = now_time;
+        }
+
 
         string[] evn_list;
         public void ShowItemInfoV2(int idx, string _evn)
@@ -146,6 +186,8 @@ namespace HopeTools
                 }
                 item_list[i].gameObject.SetActive(false);
             }
+            _idx_last = idx;
+            _last_time = Time.time;
         }
 
         [HideInInspector] public HopeTools.HopeUdonFramework hugf;

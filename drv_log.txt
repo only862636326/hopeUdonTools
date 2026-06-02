@@ -17,7 +17,9 @@ v260121 udon unity
 	-  componet拆分为单个udon
 	-  hierarchy inspector关联
 
-
+v260602 udon evn 
+    -  事件添加优化，分批setactive
+    -  修复字体缺失bug
 
 
 
