@@ -13,7 +13,6 @@ namespace HopeTools
         /// <summary>
         /// 
         /// </summary>
-        [HideInInspector] HopeUdonFramework hufw;
         private string s_evn = "";
         private int evn_data;
         private bool with_dat = false;
@@ -63,9 +62,9 @@ namespace HopeTools
 
         public override void Interact()
         {
-            if (hufw == null || s_evn == "") return;
-            if (with_dat) hufw.TriggerEventWithData(s_evn, evn_data);
-            else hufw.TriggerEvent(s_evn);
+            if (hugf == null || s_evn == "") return;
+            if (with_dat) hugf.TriggerEventWithData(s_evn, evn_data);
+            else hugf.TriggerEvent(s_evn);
         }
     }
 }

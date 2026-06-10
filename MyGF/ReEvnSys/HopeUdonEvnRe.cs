@@ -22,14 +22,21 @@ namespace HopeTools
 
         public float auto_trigger_interval = 1.0f; // 自动触发间隔时间（秒）
         private bool is_auto_triggering = false; // 是否正在自动触发中
+        public HopeTools.HopeUdonFramework hugf;
 
         void Start()
         {
             ;
         }
 
+        private bool _is_init = false;
         public void Init()
         {
+            if (_is_init)
+            {
+                return;                
+            }
+            _is_init = true;
             evn_list = new string[CONFIG_DEFAULT_EVN_LIST_SIZE];
             pause_list = new bool[CONFIG_DEFAULT_EVN_LIST_SIZE];
         }
@@ -45,6 +52,7 @@ namespace HopeTools
             ApiSendUiCmd("ClearEvn", null);
         }
 
+        #region add evn string
         /// <summary>
         /// 扩容事件数组
         /// </summary>
@@ -71,10 +79,27 @@ namespace HopeTools
             pause_list = newPauseList;
         }
 
+        private bool _is_recording = true;
+        public void StopReEvn()
+        {
+            _is_recording = false;
+        }
+
+        public void StartReEvn()
+        {
+            _is_recording = true;
+        }   
         public void AddEvnString(string s)
         {
             if (!_is_recording)
             {
+                return;
+            }
+
+            if (s.StartsWith("CmdReExt_"))
+            {
+                var _nm = s.Split('_')[1];
+                EvnReRevCmd(_nm, null);
                 return;
             }
             // 检查是否需要扩容
@@ -87,20 +112,11 @@ namespace HopeTools
             _evn_index++;
         }
 
+
         // 目前只支持两个数据参数, 并且都要为int
         public void AddEvn(string evn_name)
         {
             AddEvnString(evn_name);
-        }
-        private bool _is_recording = true;
-        public void StopReEvn()
-        {
-            _is_recording = false;
-        }
-
-        public void StartReEvn()
-        {
-            _is_recording = true;
         }
 
         public void AddEvnWithDat(string evn_name, object data)
@@ -113,6 +129,50 @@ namespace HopeTools
         {
             AddEvnString(evn_name + "|" + data1.ToString() + "|" + data2.ToString());
         }
+        #endregion add evn string
+
+        #region trg evn
+
+        public void ApiTrgCmdEvn(int evn_idx, string evn_name)
+        {
+            //LogMsg(evn_idx.ToString() + "---ApiTrgCmdEvn: " + evn_name);
+            if (evn_name == null || evn_name.Length == 0)
+            {
+                LogMsg("ApiTrgCmdEvn: evn_name 为空");
+                return;
+            }
+
+            var ss = evn_name.Split('|');
+            var _name = ss[0];
+
+            if(_name == "CmdRePauseTime")
+            {
+                soft_pause_time = float.Parse(ss[1]);
+                return;
+            }
+            soft_pause_time = 0;
+
+            if (ss.Length == 1)
+            {
+                hugf.TriggerEvent(_name);
+            }
+            else if (ss.Length == 2)
+            {
+                var _dat1 = int.Parse(ss[1]);
+                hugf.TriggerEventWithData(_name, _dat1);
+            }
+            else if (ss.Length == 3)
+            {
+                var _dat1 = int.Parse(ss[1]);
+                var _dat2 = int.Parse(ss[2]);
+                hugf.TriggerEventWith2Data(_name, _dat1, _dat2);
+            }
+            else
+            {
+                LogMsg("ApiTrgCmdEvn: " + evn_name + " 格式错误");
+            }
+        }
+
 
         public void TrgNextEvn()
         {
@@ -124,7 +184,7 @@ namespace HopeTools
                     return; // 暂停，不触发事件
                 }
                 // 触发当前事件
-
+                
                 // 移动到下一个事件
                 ApiTrgCmdEvn(_pre_run_index, evn_list[_pre_run_index]);
                 _pre_run_index++;
@@ -166,6 +226,7 @@ namespace HopeTools
             ContinueAutoTrigger();
         }
 
+        float soft_pause_time = 0;
         public void ContinueAutoTrigger()
         {
             if (!is_auto_triggering || _pre_run_index >= _evn_index)
@@ -181,7 +242,7 @@ namespace HopeTools
                 // 如果还有事件未触发，继续延迟触发
                 if (_pre_run_index < _evn_index && is_auto_triggering)
                 {
-                    SendCustomEventDelayedSeconds(nameof(ContinueAutoTrigger), auto_trigger_interval);
+                    SendCustomEventDelayedSeconds(nameof(ContinueAutoTrigger), auto_trigger_interval + soft_pause_time);
                 }
                 else
                 {
@@ -219,7 +280,8 @@ namespace HopeTools
         {
             _pre_run_index = 0;
         }
-
+        #endregion trg evn
+        
         #region UI 部分
         public HopeUdonEvnUi hopeUdonEvnUi;
         /// <summary>
@@ -246,45 +308,13 @@ namespace HopeTools
         }
         
         #endregion UI 部分
-        // 触发接口
-        public HopeTools.HopeUdonFramework hugf;
-        public void ApiTrgCmdEvn(int evn_idx, string evn_name)
-        {
-            //LogMsg(evn_idx.ToString() + "---ApiTrgCmdEvn: " + evn_name);
-            if (evn_name == null || evn_name.Length == 0)
-            {
-                LogMsg("ApiTrgCmdEvn: evn_name 为空");
-                return;
-            }
-
-            var ss = evn_name.Split('|');
-            var _name = ss[0];
-            if (ss.Length == 1)
-            {
-                hugf.TriggerEvent(_name);
-            }
-            else if (ss.Length == 2)
-            {
-                var _dat1 = int.Parse(ss[1]);
-                hugf.TriggerEventWithData(_name, _dat1);
-            }
-            else if (ss.Length == 3)
-            {
-                var _dat1 = int.Parse(ss[1]);
-                var _dat2 = int.Parse(ss[2]);
-                hugf.TriggerEventWith2Data(_name, _dat1, _dat2);
-            }
-            else
-            {
-                LogMsg("ApiTrgCmdEvn: " + evn_name + " 格式错误");
-            }
-        }
-
+        
+        #region cmd 部分
         public void EvnReRevCmd(string cmd , object param)
         {
             if (cmd == "TrgNextEvn")
             {
-                TrgNextEvn();
+                this.TrgNextEvn();
             }
             else if (cmd == "ResetEvn")
             {
@@ -315,12 +345,9 @@ namespace HopeTools
                 StartReEvn();
             }
         }
+        #endregion cmd 部分
 
-        public void LogMsg(string msg)
-        {
-            Debug.Log(msg);
-        }
-
+        #region get set all evn
         public string GetAllEvn()
         {
             var s = "";
@@ -329,6 +356,13 @@ namespace HopeTools
                 s += evn_list[i] + "\n";
             }
             return s;
+        }
+        public void SetAllEvn(string all_evn_str)
+        {
+            ClearEvn();
+            _all_evn_ss = all_evn_str.Split('\n');
+            _all_evn_idx = 0;
+            AddLoop();
         }
 
         private string[] _all_evn_ss;
@@ -345,7 +379,7 @@ namespace HopeTools
                 {
                     var evn = _all_evn_ss[_all_evn_idx].Trim();
                     if (evn.Length > 0)
-                        AddEvnString(evn);
+                        this.AddEvnString(evn);
                     _all_evn_idx++;
                     _add_limit--;
                 }
@@ -366,13 +400,11 @@ namespace HopeTools
                 }
             }
         }
+        #endregion get set all evn
 
-        public void SetAllEvn(string all_evn_str)
+        public void LogMsg(string msg)
         {
-            ClearEvn();
-            _all_evn_ss = all_evn_str.Split('\n');
-            _all_evn_idx = 0;
-            AddLoop();
+            Debug.Log(msg);
         }
     }
 }

@@ -20,8 +20,9 @@ v260121 udon unity
 v260602 udon evn 
     -  事件添加优化，分批setactive
     -  修复字体缺失bug
-
-
+v260610 udon evn 
+    - 添加事件触发系统
+    - 事件工具移动到单独文件夹
 
 
 

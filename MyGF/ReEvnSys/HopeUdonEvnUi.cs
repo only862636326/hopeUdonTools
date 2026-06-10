@@ -132,13 +132,19 @@ namespace HopeTools
 
         public void SetActiveHelp()
         {
-            for (int i = _idx_last + 1; i <= _set_idx; i++)
+            int count = _set_idx - _idx_last;
+            if(count > 50)
+            {
+                this.SendCustomEventDelayedSeconds(nameof(SetActiveHelp), _delay_time);
+                count = 50;
+            }
+            for (int i = _idx_last + 1; i < _idx_last + count; i++)
             {
                 if (item_list[i] == null) break;
                 if (!item_list[i].gameObject.activeSelf)
                     item_list[i].gameObject.SetActive(true);
             }
-            _idx_last = _set_idx;
+            _idx_last = _idx_last + count;
             _set_task_flag = 0;
         }
 
