@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1208982821285785247}
   - component: {fileID: 7963794787008997038}
   m_Layer: 17
-  m_Name: EvnItemHelp
+  m_Name: EvnTrgHelp
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
