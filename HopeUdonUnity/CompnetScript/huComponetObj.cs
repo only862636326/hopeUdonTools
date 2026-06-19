@@ -21,7 +21,7 @@ namespace HopeTools
             var prt = transform.parent;
             var idx = this.transform.GetSiblingIndex() + 1;
             _content_transform = prt.GetChild(idx);
-            _component_active_toggle = this.transform.Find("ToggleActive").GetComponent<Toggle>();
+            _component_active_toggle = this.transform.Find("ToggleCopmActive").GetComponent<Toggle>();
         }
 
         public void ToggleActive()
@@ -76,7 +76,7 @@ namespace HopeTools
 
         void InitGetComponet()
         {
-            _gameobj_sta_toggle = transform.Find("ToggleActive").GetComponent<Toggle>();
+            _gameobj_sta_toggle = transform.Find("ToggleCopmActive").GetComponent<Toggle>();
             _gameobj_name_input = transform.GetComponentInChildren<InputField>();
         }
 

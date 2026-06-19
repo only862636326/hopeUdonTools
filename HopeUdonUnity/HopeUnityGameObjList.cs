@@ -15,22 +15,24 @@ namespace HopeTools
         public const int CONFIG_TILE_TABLE_SIZE = 20;
         public const string CONFIG_STRING_ICON = "ToggleIcom";
         public const string CONFIG_STRING_NAME = "ToggleName";
+        public const int max_item_num = 1000;
+        
+        public Transform managed_root;
+        public int show_deep = int.MaxValue;
 
-        public const int max_item_num = 50;
+        [Space(10)] 
         public GameObject _list_item_pre; // perfab for list item
-
         private Transform[] itemgameObjList;
-        [SerializeField] private Transform[] itemManagerTfList;
+        private Transform[] itemManagerTfList;
         
         private Toggle[] _toggle_name_list;
         private Toggle[] _toggle_icon_list;
         private bool[] _toggle_is_on_name_list;
         private int[] _prt_idx_list;
 
-        public Transform managed_root;
-        public Transform active_tf;
+        [HideInInspector] public Transform active_tf;
         private bool _is_init = false;
-        public int item_show_num = 0;
+        private int item_show_num = 0;
 
         private Vector3 icon_p_base;
         private Vector3 name_p_base;
@@ -162,6 +164,9 @@ namespace HopeTools
         public void AddChildToManagedList(Transform tf, int depth, int prt_idx)
         {
             if (tf == null || this.item_show_num >= this.itemgameObjList.Length - 1)
+                return;
+
+            if (depth > show_deep)
                 return;
 
             var s = "  " + tf.name;

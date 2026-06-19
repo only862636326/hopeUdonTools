@@ -22,7 +22,7 @@ namespace HopeTools
             var prt = transform.parent;
             var idx = this.transform.GetSiblingIndex() + 1;
             _content_transform = prt.GetChild(idx);
-            _component_active_toggle = this.transform.Find("ToggleActive").GetComponent<Toggle>();
+            _component_active_toggle = this.transform.Find("ToggleCopmActive").GetComponent<Toggle>();
         }
 
         //public void ToggleActive()
