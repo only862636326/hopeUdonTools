@@ -12,17 +12,26 @@ namespace HopeTools
     {
         public UdonSharpBehaviour[] udons;
         public string evnName;
+        public bool _is_nex = false;
+        void Start()
+        {
+            if (evnName == "")
+                evnName = this.gameObject.name;
+        }
+
         public override void Interact()
         {
-            if(evnName == "")
-                evnName = this.gameObject.name;
             foreach (UdonSharpBehaviour udon in udons)
             {
-                udon.SendCustomEvent(this.gameObject.name);
+                udon.SetProgramVariable("eventData", evnName);
+                var _name = _is_nex ? "nex" : "ex";
+                udon.SendCustomEvent(_name);
             }
         }
     }
 }
+
+
 
 
 

@@ -5,8 +5,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using VRC.SDKBase;
 using VRC.Udon;
-using UnityEditor.UI;
-using System.Collections.Generic;
 
 namespace HopeTools
 {

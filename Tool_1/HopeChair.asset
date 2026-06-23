@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: HopeChair
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 0f29ca0d6967904449e1f14bce8bf9bb,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 2ff063bae17f68e4c9e0f445a892f704,
     type: 2}
   udonAssembly: 
   assemblyError: 

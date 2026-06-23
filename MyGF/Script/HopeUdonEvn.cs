@@ -208,7 +208,7 @@ namespace HopeTools
         // 触发带参数的本地事件
         public void TriggerEventWith2Data(string eventName, object data, object data2)
         {
-            hugf.udondebug.LogUdonMsg(this, $"trg event dat: {eventName}, {data}");
+            hugf.udondebug.LogUdonMsg(this, $"trg event 2dat: {eventName}, {data},  {data2}");
             for (int i = 0; i < eventNames.Length; i++)
             {
                 if (eventNames[i] == eventName)

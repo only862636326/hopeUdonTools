@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: LineSwitch
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: b826cc791df105e4386631abd6690d31,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 67e3c743148757a4bbc057f71e9cdd75,
     type: 2}
   udonAssembly: 
   assemblyError: 

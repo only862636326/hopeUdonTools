@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: HopeLexerDemo
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 37573def3a6572240a94d60bd620e382,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 6a3f3ad7694e0004db2f3e7b2584c2dc,
     type: 2}
   udonAssembly: 
   assemblyError: 

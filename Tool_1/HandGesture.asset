@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: HandGesture
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: c501d7e139a289841afd72fbe277e634,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: a647b477375330b4aa5fe115626b096f,
     type: 2}
   udonAssembly: 
   assemblyError: 
-  sourceCsScript: {fileID: 11500000, guid: db335a11f04867240bb46ae6ec03699b, type: 3}
+  sourceCsScript: {fileID: 11500000, guid: fceb48d51cccbda44b1bd9ad3553e30c, type: 3}
   scriptVersion: 2
   compiledVersion: 2
   behaviourSyncMode: 0

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: HopeUdonFsmManager
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: b23adc0cb7670344d89f7ca371289ca3,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 546c73caa5325b44eb7796396d5dfdec,
     type: 2}
   udonAssembly: 
   assemblyError: 
