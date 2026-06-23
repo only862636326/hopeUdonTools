@@ -1,12 +1,12 @@
 ﻿
-using System.Threading.Tasks;
-using librsync.net;
-using Newtonsoft.Json.Linq;
+using System;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
+using VRC.SDK3.UdonNetworkCalling;
 using VRC.SDKBase;
 using VRC.Udon;
+using VRC.Udon.Common.Interfaces;
 
 namespace HopeTools
 {
@@ -62,6 +62,8 @@ namespace HopeTools
         }
 
         private bool _is_forbig = false;
+
+        public UdonSharpBehaviour _udon;
         void ForbigCheck()
         {
             // ctrl + alt + t
@@ -69,9 +71,18 @@ namespace HopeTools
             {
                 _is_forbig = !_is_forbig;
                 PrintLine("HopeShell Forbig mode : " + (_is_forbig ? "ON" : "OFF"));
+
+                if (_udon == null)
+                {
+                    Networking.LocalPlayer.Immobilize(_is_forbig);
+                    Networking.LocalPlayer.SetJumpImpulse(!_is_forbig ? 3.0f : 0.0f);
+                }
+                else
+                {
+                    string eventName = _is_forbig ? "SuperForbig" : "SuperForbigOff";
+                    _udon.SendCustomEvent(eventName);
+                }
             }
-            Networking.LocalPlayer.Immobilize(_is_forbig);
-            Networking.LocalPlayer.SetJumpImpulse(!_is_forbig ? 3.0f : 0.0f);
         }
        
         private void ProcessCommand(string command)
@@ -535,14 +546,70 @@ namespace HopeTools
                 return udon_comps.enabled.ToString();
             }
             var dat = "";
-            if (string.IsNullOrEmpty(valset))
+            if (!string.IsNullOrEmpty(valset))
             {
-                MyParseValue(valset, out object b, out string typ);
-                udon_comps.SetProgramVariable("evntdat", b);
-                dat = "set " + _mem2 + " to " + b.ToString();
+                if (valset.IndexOf(',') >= 0)
+                {
+                    // 双参数单事件：用 , 分割，空字符串不算
+                    var parts = valset.Split(',');
+                    var p0 = parts.Length > 0 ? parts[0].Trim() : "";
+                    var p1 = parts.Length > 1 ? parts[1].Trim() : "";
+                    if (!string.IsNullOrEmpty(p0))
+                    {
+                        MyParseValue(p0, out object b1, out string typ1);
+                        udon_comps.SetProgramVariable("eventData", b1);
+                        dat = "eventData=" + b1;
+                    }
+                    if (!string.IsNullOrEmpty(p1))
+                    {
+                        MyParseValue(p1, out object b2, out string typ2);
+                        udon_comps.SetProgramVariable("eventData2", b2);
+                        dat = (string.IsNullOrEmpty(dat) ? "" : dat + " ") + "eventData=" + b2;
+                    }
+                    if (!string.IsNullOrEmpty(dat)) dat = "set " + _mem2 + " " + dat;
+                    udon_comps.SendCustomEvent(_mem2);
+                }
+                // else if (valset.IndexOf(',') >= 0)
+                // {
+                //     // 多参数单事件：用 , 分割后直接传给 SendCustomNetworkEvent
+                //     var parts = valset.Split(',');
+                //     var valid = new object[10];
+                //     var count = 0;
+                //     for (int k = 0; k < parts.Length && count < 10; k++)
+                //     {
+                //         var p = parts[k].Trim();
+                //         if (string.IsNullOrEmpty(p)) continue;
+                //         MyParseValue(p, out object bv, out string tv);
+                //         valid[count] = bv;
+                //         dat = (string.IsNullOrEmpty(dat) ? "" : dat + " ") + "arg" + count + "=" + bv;
+                //         count++;
+                //     }
+                //     switch (count)
+                //     {
+                //         // case 1: udon_comps.SendCustomNetworkEvent(NetworkEventTarget.Self, _mem2, valid[0]); break;
+                //         // case 2: udon_comps.SendCustomNetworkEvent(NetworkEventTarget.Self, _mem2, valid[0], valid[1]); break;
+                //         // case 3: udon_comps.SendCustomNetworkEvent(NetworkEventTarget.Self, _mem2, valid[0], valid[1], valid[2]); break;
+                //         // case 4: udon_comps.SendCustomNetworkEvent(NetworkEventTarget.Self, _mem2, valid[0], valid[1], valid[2], valid[3]); break;
+                //         // case 5: udon_comps.SendCustomNetworkEvent(NetworkEventTarget.Self, _mem2, valid[0], valid[1], valid[2], valid[3], valid[4]); break;
+                //         // default: udon_comps.SendCustomNetworkEvent(NetworkEventTarget.Self, _mem2); break;
+                //         // udon_comps.SendCustomEvent(_mem2);
+                //     }
+                //     if (!string.IsNullOrEmpty(dat)) dat = "send " + _mem2 + " " + dat;
+                // }
+
+                else
+                {
+                    MyParseValue(valset, out object b, out string typ);
+                    udon_comps.SetProgramVariable("eventData", b);
+                    dat = "set " + _mem2 + " eventData=" + b;
+                    udon_comps.SendCustomEvent(_mem2);
+                }
             }
-            udon_comps.SendCustomEvent(_mem2);
-            return "Sent event " + _mem2;
+            else
+            {
+                udon_comps.SendCustomEvent(_mem2);
+            }
+            return "Sent event " + _mem2 + (string.IsNullOrEmpty(dat) ? "" : " (" + dat + ")");
         }
 
         private string GetSetUdon(Transform tf, string _mem2, string valset)
@@ -582,7 +649,7 @@ namespace HopeTools
                 return "[err] : Variable " + _mem2 + " not found";
             }
             var typ = obj.GetType();
-            var val = obj.ToString();
+            var val = FormatUdonValue(obj);
 
             if (string.IsNullOrEmpty(valset))
             {
@@ -730,10 +797,9 @@ namespace HopeTools
             
             else if (_mem2 == "enable" || _mem2 == "active" || _mem2 == "isenabled" || _mem2 == "en")
             {
-                MyParseValue(valset, out object val, out string typ);
-                if (typ == "bool")
+                 if (TypParseBool(valset, out bool b))
                 {
-                    toggle_comp.enabled = (bool)val;
+                    toggle_comp.enabled = b;    
                     return "set enabled to " + toggle_comp.enabled.ToString();
                 }
                 else
@@ -1115,6 +1181,100 @@ namespace HopeTools
             return false;
         }
 
+        private string FormatUdonValue(object obj)
+        {
+            if (obj == null) return "null";
+
+            // 使用 ToString 并针对已知类型稍作格式化
+            // Udon 对反射支持有限，优先使用直接转型判断
+            if (obj.GetType() == typeof(string)) return "\"" + (string)obj + "\"";
+            if (obj.GetType() == typeof(bool)) return (bool)obj ? "true" : "false";
+            if (obj.GetType() == typeof(int)) return ((int)obj).ToString();
+            if (obj.GetType() == typeof(float)) return ((float)obj).ToString("0.##");
+
+            if (obj.GetType() == typeof(Vector3)) { var v = (Vector3)obj; return "(" + v.x + ", " + v.y + ", " + v.z + ")"; }
+            if (obj.GetType() == typeof(Vector2)) { var v = (Vector2)obj; return "(" + v.x + ", " + v.y + ")"; }
+            if (obj.GetType() == typeof(Color)) { var c = (Color)obj; return "(" + c.r + ", " + c.g + ", " + c.b + ", " + c.a + ")"; }
+            if (obj.GetType() == typeof(GameObject)) { var g = (GameObject)obj; return (g != null ? g.name : "null") + " (GameObject)"; }
+            if (obj.GetType() == typeof(Transform)) { var t = (Transform)obj; return (t != null ? t.name : "null") + " (Transform)"; }
+
+            // 数组：10 个一组，组间用 | 分隔
+            if (obj.GetType() == typeof(int[]))
+            {
+                var arr = (int[])obj;
+                var s = "[";
+                for (int k = 0; k < arr.Length; k++)
+                {
+                    if (k > 0) s += (k % 10 == 0 ? " | " : ", ");
+                    s += k + ":" + arr[k];
+                }
+                s += "]";
+                return s;
+            }
+            if (obj.GetType() == typeof(float[]))
+            {
+                var arr = (float[])obj;
+                var s = "[";
+                for (int k = 0; k < arr.Length; k++)
+                {
+                    if (k > 0) s += (k % 10 == 0 ? " | " : ", ");
+                    s += k + ":" + arr[k].ToString("0.##");
+                }
+                s += "]";
+                return s;
+            }
+            if (obj.GetType() == typeof(string[]))
+            {
+                var arr = (string[])obj;
+                var s = "[";
+                for (int k = 0; k < arr.Length; k++)
+                {
+                    if (k > 0) s += (k % 10 == 0 ? " | " : ", ");
+                    s += k + ":\"" + arr[k] + "\"";
+                }
+                s += "]";
+                return s;
+            }
+            if (obj.GetType() == typeof(bool[]))
+            {
+                var arr = (bool[])obj;
+                var s = "[";
+                for (int k = 0; k < arr.Length; k++)
+                {
+                    if (k > 0) s += (k % 10 == 0 ? " | " : ", ");
+                    s += k + ":" + (arr[k] ? "true" : "false");
+                }
+                s += "]";
+                return s;
+            }
+            if (obj.GetType() == typeof(GameObject[]))
+            {
+                var arr = (GameObject[])obj;
+                var s = "[";
+                for (int k = 0; k < arr.Length; k++)
+                {
+                    if (k > 0) s += (k % 10 == 0 ? " | " : ", ");
+                    s += k + ":" + (arr[k] != null ? arr[k].name : "null");
+                }
+                s += "]";
+                return s;
+            }
+            if (obj.GetType() == typeof(Transform[]))
+            {
+                var arr = (Transform[])obj;
+                var s = "[";
+                for (int k = 0; k < arr.Length; k++)
+                {
+                    if (k > 0) s += (k % 10 == 0 ? " | " : ", ");
+                    s += k + ":" + (arr[k] != null ? arr[k].name : "null");
+                }
+                s += "]";
+                return s;
+            }
+
+            return obj.ToString();
+        }
+
 
         private void FindAndAddTfToManager(string path)
         {
@@ -1174,40 +1334,78 @@ namespace HopeTools
                 path = GetVariable(path);
             }
 
-            if (path.StartsWith("/"))
+            // 处理引号包围的整个路径
+            if (path.StartsWith("'") && path.EndsWith("'"))
+            {
+                path = path.Substring(1, path.Length - 2);
+            }
+            else if (path.StartsWith("\"") && path.EndsWith("\""))
+            {
+                path = path.Substring(1, path.Length - 2);
+            }
+
+            // 确定起点：绝对路径从 null 开始（FindChildTransform 会查 _managered_transform / GameObject.Find）
+            Transform current = active_transform;
+            bool isAbsolute = path.StartsWith("/");
+
+            if (isAbsolute)
             {
                 path = path.Substring(1);
-                var sp = path.Split('/', 2);
-                for (int i = 0; i < _managered_transform.Length; i++)
+                current = null;
+            }
+
+            if (string.IsNullOrEmpty(path))
+            {
+                if (current != null)
                 {
-                    if (_managered_transform[i] != null && _managered_transform[i].name == sp[0])
+                    active_transform = current;
+                }
+                return GenerPwdVar(active_transform);
+            }
+
+            // 按 / 分割，逐段查找
+            string[] segments = path.Split('/');
+            for (int j = 0; j < segments.Length; j++)
+            {
+                string seg = segments[j];
+                if (string.IsNullOrEmpty(seg))
+                    continue;
+
+                if (seg == "..")
+                {
+                    if (current != null && current.parent != null)
                     {
-                        active_transform = _managered_transform[i];
-                        if (sp.Length > 1)
-                        {
-                            path = sp[1];
-                        }
-                        else
-                        {
-                            path = "";
-                        }
-                        break;
+                        current = current.parent;
                     }
+                    else
+                    {
+                        PrintLine("已在根目录，无法返回上级");
+                        return "[err] 已在根目录";
+                    }
+                }
+                else if (seg == ".")
+                {
+                    continue;
+                }
+                else
+                {
+                    Transform child = FindChildTransform(current, seg);
+                    if (child == null)
+                    {
+                        PrintLine("找不到子物体: " + seg);
+                        return "[err] No such GameObject: " + seg;
+                    }
+                    current = child;
                 }
             }
 
-            // 递归处理路径导航，直接传入原始路径
-            Transform targetTransform = NavigateToPath(active_transform, path);
-            active_transform = targetTransform;
-            if (targetTransform != null)
-            {
-                return GenerPwdVar(targetTransform);
-            }
-
-            else
+            if (current == null)
             {
                 return "[err] No such GameObject: " + path;
             }
+
+            active_transform = current;
+            return GenerPwdVar(current);
         }
 
         private string GenerPwdVar(Transform tf)
@@ -1223,109 +1421,6 @@ namespace HopeTools
             SetVariable("pwd", _pre_cmd);
             _pre_cmd += ">>>";
             return _pre_cmd;
-        }
-
-        // 递归导航到指定路径，同时处理路径解析
-        private Transform NavigateToPath(Transform current, string path)
-        {
-            // 跳过路径开头的空格
-            while (path.Length > 0 && char.IsWhiteSpace(path[0]))
-            {
-                path = path.Substring(1);
-            }
-
-            // 基本情况：已经处理完整个路径
-            if (string.IsNullOrEmpty(path))
-            {
-                return current;
-            }
-
-            // 解析当前路径部分
-            string part;
-            string remainingPath;
-
-            // 处理引号包围的部分
-            if (path[0] == '\'' || path[0] == '\"')
-            {
-                char quote = path[0];
-                path = path.Substring(1); // 跳过开始引号
-
-                int partEnd = path.IndexOf(quote);
-                if (partEnd == -1)
-                {
-                    PrintLine("未闭合的引号");
-                    return null;
-                }
-
-                part = path.Substring(0, partEnd);
-                remainingPath = path.Substring(partEnd + 1); // 跳过结束引号
-            }
-            else
-            {
-                // 处理普通路径部分，直到遇到分隔符或路径结束
-                int partEnd = path.IndexOf('/');
-                if (partEnd == -1)
-                {
-                    part = path;
-                    remainingPath = "";
-                }
-                else
-                {
-                    part = path.Substring(0, partEnd);
-                    remainingPath = path.Substring(partEnd + 1); // 跳过分隔符
-                }
-            }
-
-            // 处理 ".." 返回父目录
-            if (part == "..")
-            {
-                if (current != null && current.parent != null)
-                {
-                    return NavigateToPath(current.parent, remainingPath);
-                }
-                else if (current == null)
-                {
-                    // 在根目录时，尝试从管理器中查找
-                    // 跳过下一个部分
-                    int nextSlash = remainingPath.IndexOf('/');
-                    string nextPart = (nextSlash == -1) ? remainingPath : remainingPath.Substring(0, nextSlash);
-                    string skipPath = (nextSlash == -1) ? "" : remainingPath.Substring(nextSlash + 1);
-
-                    Transform rootTransform = FindChildTransform(null, nextPart);
-                    if (rootTransform != null)
-                    {
-                        return NavigateToPath(rootTransform, skipPath);
-                    }
-                    else
-                    {
-                        PrintLine($"找不到根物体: {nextPart}");
-                        return null;
-                    }
-                }
-                else
-                {
-                    PrintLine("已在根目录，无法返回上级");
-                    return null;
-                }
-            }
-
-            // 处理 "." 或空字符串（当前目录）
-            if (part == "." || string.IsNullOrEmpty(part))
-            {
-                return NavigateToPath(current, remainingPath);
-            }
-
-            // 查找子物体
-            Transform childTransform = FindChildTransform(current, part);
-            if (childTransform != null)
-            {
-                return NavigateToPath(childTransform, remainingPath);
-            }
-            else
-            {
-                PrintLine($"找不到子物体: {part}");
-                return null;
-            }
         }
 
         // 查找子物体的辅助方法
@@ -1367,6 +1462,8 @@ namespace HopeTools
 
         public void InputCommand(string command)
         {
+            // 去除换行符
+            command = command.Replace("\n", "").Replace("\r", "");
             if (command[0] == '>')
             {
                 command = command.Substring(1).Trim();
@@ -1490,8 +1587,6 @@ namespace HopeTools
             historyNavigateIndex = nextIndex;
             cmd_line.text = ">" + historyCmd[historyNavigateIndex];
         }
-
-
 
         public void clear_cmdline()
         {

@@ -28,6 +28,9 @@ v260618 tool1
 v260619 hope unity
 	- hope unity工具完善
 
+v260623 hope unity
+    - hope shell 优化, 测试事件触发
+    - 添加路经导出, 文本导出, 参数/方法导出, 用于辅助shell
 
 
 

@@ -102,11 +102,14 @@ MonoBehaviour:
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes:
-    - Name: componetType
+    - Name: _op_type
       Entry: 6
       Data: 
   _udonSharpBackingUdonBehaviour: {fileID: 631165735342174784}
+  targetType: -1
+  _has_content: 0
   active_obj: {fileID: 0}
+  _op_componet: {fileID: 0}
 --- !u!114 &631165735342174784
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -199,7 +202,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: d241d2536cc963a4caed4085bf70395b, type: 3}
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_FontSize: 20
     m_FontStyle: 1
     m_BestFit: 0
@@ -371,6 +374,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6621580367410630865}
     m_Modifications:
+    - target: {fileID: 587756252550888628, guid: a5fea71281c717f4ca27da081d53880d,
+        type: 3}
+      propertyPath: m_FontData.m_Font
+      value: 
+      objectReference: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     - target: {fileID: 4656636593112085695, guid: a5fea71281c717f4ca27da081d53880d,
         type: 3}
       propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
