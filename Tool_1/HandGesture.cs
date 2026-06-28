@@ -3,6 +3,7 @@ using System;
 using TMPro;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.UI;
 using VRC.SDKBase;
 using VRC.Udon;
 
@@ -23,9 +24,9 @@ namespace HopeTools
 
         public string s_Gesture;
 
-        [SerializeField] private int maxGestureHistory = 5;
+        [SerializeField] private int maxGestureHistory = 20;
         private int[] gestureHistory;
-        private int gestureHistoryCount = 0;
+        private int gestureHistoryCount = 1;
 
         private string GestureToLabel(int gesture)
         {
@@ -48,8 +49,11 @@ namespace HopeTools
         private void PushGestureToHistory(int gesture)
         {
             // skip if same as last detected gesture
-            if (gestureHistoryCount > 0 && gestureHistory[gestureHistoryCount - 1] == gesture)
+            if (gestureHistoryCount <= 0)
                 return;
+
+            //if (gestureHistory[gestureHistoryCount - 1] == gesture)
+            //    return;
 
             // shift left if buffer full
             if (gestureHistoryCount >= maxGestureHistory)
@@ -68,7 +72,7 @@ namespace HopeTools
                 if (i > 0) display += " |";
                 display += GestureToLabel(gestureHistory[i]);
             }
-            Debug.Log(display);
+            LogMsg(display);
         }
 
         //-----------Gesture tracking---------------
@@ -256,11 +260,11 @@ namespace HopeTools
                 return false; 
             }
 
-            if (!IsTestMode() && !IsLookingAtHand(isRight ? rightHand : leftHand)) 
-            { 
-                movementCache[cacheIndex] = 0; 
-                return false; 
-            }
+            //if (!IsTestMode() && !IsLookingAtHand(isRight ? rightHand : leftHand)) 
+            //{ 
+            //    movementCache[cacheIndex] = 0; 
+            //    return false; 
+            //}
 
             if (movement.magnitude / time_delta <= REQUIRED_MOVE_SPEED * local_player_height) 
             { 
@@ -344,6 +348,7 @@ namespace HopeTools
         /// <returns></returns>
         public float GetAvatarHeight(VRCPlayerApi player)
         {
+            return 1.2f;
             float height = 0;
             Vector3 postition1 = player.GetBonePosition(HumanBodyBones.Head);
             Vector3 postition2 = player.GetBonePosition(HumanBodyBones.Neck);
@@ -365,5 +370,18 @@ namespace HopeTools
                 return 1;
             return GetAvatarHeight(Networking.LocalPlayer);
         }
+
+        public Text text;
+
+        public void LogMsg(string msg)
+        {
+            if (text != null)
+            {
+                text.text = msg;
+            }
+            Debug.Log(msg);
+        }
     }
 }
+
+

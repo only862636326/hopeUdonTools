@@ -24,7 +24,7 @@ namespace HopeTools
 
         void Start()
         {
-            ;
+            Init();
         }
 
         private bool _is_init = false;
@@ -86,9 +86,14 @@ namespace HopeTools
         public void StartReEvn()
         {
             _is_recording = true;
-        }   
+        }
+
         public void AddEvnString(string s)
         {
+            if(!this.gameObject.activeSelf)
+            {
+                return;
+            }
             if (!_is_recording)
             {
                 return;
@@ -127,6 +132,7 @@ namespace HopeTools
         {
             AddEvnString(evn_name + "|" + data1.ToString() + "|" + data2.ToString());
         }
+
         #endregion add evn string
 
         #region trg evn
@@ -137,6 +143,12 @@ namespace HopeTools
             if (evn_name == null || evn_name.Length == 0)
             {
                 LogMsg("ApiTrgCmdEvn: evn_name 为空");
+                return;
+            }
+
+            if (hugf == null)
+            {
+                LogMsg("Hugf is null");
                 return;
             }
 
@@ -163,6 +175,7 @@ namespace HopeTools
             {
                 var _dat1 = int.Parse(ss[1]);
                 var _dat2 = int.Parse(ss[2]);
+                
                 hugf.TriggerEventWith2Data(_name, _dat1, _dat2);
             }
             else

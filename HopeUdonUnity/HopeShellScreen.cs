@@ -12,9 +12,39 @@ namespace HopeTools
         public InputField _screen_text;
         public Scrollbar _scrobal;
         public int _line_count = 0;
+
+        private bool _is_forbig = false;
+        public UdonSharpBehaviour _udon;
+
         void Start()
         {
             ;
+        }
+
+        void Update()
+        {
+            ForbigCheck();
+        }
+
+        void ForbigCheck()
+        {
+            // ctrl + alt + t
+            if (Input.GetKeyDown(KeyCode.T) && Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftAlt))
+            {
+                _is_forbig = !_is_forbig;
+                PrintLine("HopeShell Forbig mode : " + (_is_forbig ? "ON" : "OFF"));
+
+                if (_udon == null)
+                {
+                    Networking.LocalPlayer.Immobilize(_is_forbig);
+                    Networking.LocalPlayer.SetJumpImpulse(!_is_forbig ? 3.0f : 0.0f);
+                }
+                else
+                {
+                    string eventName = _is_forbig ? "SuperForbig" : "SuperForbigOff";
+                    _udon.SendCustomEvent(eventName);
+                }
+            }
         }
 
         public void PrintLine(string line)

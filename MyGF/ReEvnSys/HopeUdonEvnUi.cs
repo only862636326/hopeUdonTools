@@ -100,13 +100,13 @@ namespace HopeTools
             }
         }
 
-
         public void ShowItemInfo(int idx, string _evn)
         {
             if (idx < 0 || idx >= CONFIG_MAX_ITEM_COUNT)
             {
                 return;
             }
+
             if (idx >= item_list.Length)
             {
                 ExpandArrays();
@@ -117,16 +117,21 @@ namespace HopeTools
                 new_item.SetParent(item_perferb.transform.parent, false);
                 item_list[idx] = new_item;
             }
+
             item_list[idx].GetChild(0).GetChild(0).GetComponent<Text>().text = idx.ToString();
             item_list[idx].GetChild(1).GetComponent<InputField>().text = _evn;
             // item_list[idx].gameObject.SetActive(true);
             this._set_idx = idx;
+            if (this._idx_last > this._set_idx)
+            {
+                this._idx_last = this._set_idx;
+            }
             SetActiveDelay();
         }
 
         float _last_time = 0.0f;
         float _delay_time = 0.5f;
-        int _idx_last = -1;
+        int _idx_last = 0;
         int _set_idx = 0;
         int _set_task_flag = 0;
 
@@ -138,7 +143,8 @@ namespace HopeTools
                 this.SendCustomEventDelayedSeconds(nameof(SetActiveHelp), _delay_time);
                 count = 50;
             }
-            for (int i = _idx_last + 1; i < _idx_last + count; i++)
+
+            for (int i = _idx_last; i <= _idx_last + count; i++)
             {
                 if (item_list[i] == null) break;
                 if (!item_list[i].gameObject.activeSelf)

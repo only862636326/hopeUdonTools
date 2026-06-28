@@ -138,9 +138,25 @@ namespace HopeTools
         /// <summary>
         /// 切换事件运行索引
         /// </summary>
+        /// 
+
+        private bool _is_forbig = false;
+        public void EnRunEvn()
+        {
+            _is_forbig = false;
+        }
+
         public void ToggleEvn_RunIdx()
         {
-            for(int i = 0; i < item_list.Length; i++)
+            if(this._is_forbig)
+            {
+                this.SendCustomEventDelayedSeconds(nameof(EnRunEvn), 0.3f);
+                return;
+            }
+            this._is_forbig = true;
+            this.SendCustomEventDelayedSeconds(nameof(EnRunEvn), 0.3f);
+
+            for (int i = 0; i < item_list.Length; i++)
             {
                 if(item_list[i] == null)
                 {
@@ -152,6 +168,8 @@ namespace HopeTools
                    HelpTrgCmdEvn(i);
                }
             }
+
+
             LogMsg("ToggleEvn_RunIdx");
         }
 

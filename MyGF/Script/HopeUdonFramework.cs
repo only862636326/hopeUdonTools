@@ -3,6 +3,7 @@ using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
+using static VRC.SDKBase.VRC_Pickup;
 
 namespace HopeTools
 {
@@ -103,7 +104,7 @@ namespace HopeTools
             {
                 udonEvn.TriggerEvent(eventName);
             }
-            if(udonEvnRe != null)
+            if (udonEvnRe != null)
             {
                 udonEvnRe.AddEvn(eventName);
             }
@@ -135,7 +136,7 @@ namespace HopeTools
 
         public void Log(string message)
         {
-            if(udondebug != null)
+            if (udondebug != null)
             {
                 udondebug.Log(message);
             }
@@ -169,3 +170,5 @@ namespace HopeTools
         }
     }
 }
+
+

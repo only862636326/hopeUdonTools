@@ -228,6 +228,7 @@ namespace HopeTools
                 this.SendCustomEventDelayedSeconds(nameof(DecTimeUser), 0.5f);
             }
         }
+
         #endregion 自动跟随模式
 
         /// <summary>Use触发: 命中牌HitBox时发VrInputTrg, 命中Toggle时翻转Toggle状态</summary>

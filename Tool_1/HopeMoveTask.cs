@@ -80,7 +80,7 @@ namespace HopeTools
         {
             if (task_tar_tf_list == null || task_obj_tf_list == null)
                 return NO_SLOT;
-
+            //return NO_SLOT;
             int count = Mathf.Min(task_tar_tf_list.Length, task_obj_tf_list.Length, MAX_TASK_NUM);
 
             for (int i = 0; i < count; i++)

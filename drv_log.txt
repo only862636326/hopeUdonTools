@@ -34,5 +34,13 @@ v260623 hope unity
 
 v260623_01 
 	- 全量pull
-
+	
+v260628
+    - 手势优化
+    - moveTask使用P_R 存起始位置
+    - chair实现超级禁止
+    - pad开发
+    - HopeUdonEvnHelp 短时内只能触发一次, 防止重复触发	
+	- HopeShell 代码分区, 禁止功能放到Screen
+	- UdonExportTool 导出相应shell指令
 
