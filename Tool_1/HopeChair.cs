@@ -4,7 +4,7 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
 
-namespace HopeUdonTools
+namespace HopeTools
 {
     public class HopeChair : UdonSharpBehaviour
     {

@@ -348,7 +348,6 @@ namespace HopeTools
         /// <returns></returns>
         public float GetAvatarHeight(VRCPlayerApi player)
         {
-            return 1.2f;
             float height = 0;
             Vector3 postition1 = player.GetBonePosition(HumanBodyBones.Head);
             Vector3 postition2 = player.GetBonePosition(HumanBodyBones.Neck);
@@ -364,6 +363,7 @@ namespace HopeTools
             height += (postition1 - postition2).magnitude;
             return height;
         }
+
         private float GetLocalAvatarHeight()
         {
             if (Networking.LocalPlayer == null)

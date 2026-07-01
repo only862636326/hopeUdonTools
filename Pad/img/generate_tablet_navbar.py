@@ -11,15 +11,15 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def generate_tablet_navbar(
-    width: int = 1024,
-    height: int = 72,
+    width: int = 900,
+    height: int = 100,
     corner_radius: int = 24,
     bg_color: tuple = (26, 26, 26, 230),       # dark semi-transparent
     indicator_width: int = 134,
     indicator_height: int = 5,
     indicator_radius: int = 3,
     indicator_color: tuple = (255, 255, 255, 153),  # white ~60%
-    output_name: str = "TabletNavBar_1024x72_r24.png",
+    output_name: str = "TabletNavBar_900x100_r24.png",
 ) -> str:
     img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
@@ -52,4 +52,5 @@ def generate_tablet_navbar(
 
 
 if __name__ == "__main__":
+
     generate_tablet_navbar()

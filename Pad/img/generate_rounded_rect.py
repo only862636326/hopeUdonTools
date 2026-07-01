@@ -92,12 +92,14 @@ def batch_generate(configs: list[dict]):
 # ── CLI entry point ────────────────────────────────────────
 if __name__ == "__main__":
     
-    width = 640
-    height = 360
+    width = 900 /3 
+    height = 100/3
     radius = 30
     mode = "mask"
+    mode = "frame"
+    
     stroke_width = 4
-    invert = True
+    invert = False
 
     parser = argparse.ArgumentParser(description="Generate a rounded-rectangle image")
     parser.add_argument("--width", type=int, default=width, help="Image width (px)")

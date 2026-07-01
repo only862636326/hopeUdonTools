@@ -43,4 +43,7 @@ v260628
     - HopeUdonEvnHelp 短时内只能触发一次, 防止重复触发	
 	- HopeShell 代码分区, 禁止功能放到Screen
 	- UdonExportTool 导出相应shell指令
-
+v260701
+    - pad APP加动画
+	- cal 开发
+	

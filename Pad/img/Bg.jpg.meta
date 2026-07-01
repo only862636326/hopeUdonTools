@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 66935e4e84deaf648a7634d292192e1e
+guid: de79747bb128e6d42bd6046eedcf2a77
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -95,49 +95,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites:
-    - serializedVersion: 2
-      name: RoundedMask_640x360_r30_inv_0
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 1
-        width: 28
-        height: 359
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: aa4ddf4848608a04ab34d9d30e3614f6
-      internalID: 999227812
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: RoundedMask_640x360_r30_inv_1
-      rect:
-        serializedVersion: 2
-        x: 613
-        y: 0
-        width: 27
-        height: 360
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: ce3c8897187973f4dbf52dc82906ad5b
-      internalID: 709609094
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
+    sprites: []
     outline: []
     physicsShape: []
     bones: []
@@ -148,11 +106,7 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable:
-      RoundedMask_640x360_r30_inv_0: 999227812
-      RoundedMask_640x360_r30_inv_1: 709609094
-      RoundedMask_640x360_r30_inv_2: -1001295939
-      RoundedMask_640x360_r30_inv_3: 603502361
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
