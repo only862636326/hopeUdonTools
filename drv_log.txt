@@ -46,4 +46,7 @@ v260628
 v260701
     - pad APP加动画
 	- cal 开发
-	
+v260705
+    - pad 横屏
+	- unity shell 网络支持
+	- unity部分数据通过网络同步到VRC客户端

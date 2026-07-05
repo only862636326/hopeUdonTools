@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2658021974438108303}
   - component: {fileID: 2657576711091292484}
   m_Layer: 19
-  m_Name: InputField (LegacyVrc
+  m_Name: InputFieldTfInput
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

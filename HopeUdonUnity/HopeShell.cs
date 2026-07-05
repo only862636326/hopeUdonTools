@@ -29,7 +29,8 @@ namespace HopeTools
         public Transform[] _managered_transform;
 
         private bool _compar_result = false;
-        void Start()
+
+        void Start()    
         {
             // Initialize arrays
             variableNames = new string[maxVariables];
@@ -46,18 +47,7 @@ namespace HopeTools
 
         void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Return))
-            {
-                OnCmdLineSubmit();
-            }
-            if (Input.GetKeyDown(KeyCode.UpArrow))
-            {
-                OnCmdLineUpArrow();
-            }
-            else if (Input.GetKeyDown(KeyCode.DownArrow))
-            {
-                OnCmdLineDownArrow();
-            }
+            ;
         }
        
         #region Command Processing
@@ -66,12 +56,13 @@ namespace HopeTools
         private void ProcessCommand(string command)
         {
             if (string.IsNullOrWhiteSpace(command)) return;
+            var _pre_cmd = "    ";
 
             // Check if this is a member variable access (e.g., ".variableName")
             if (command.StartsWith(".") && command.Length > 1)
             {
                 var ret = MemberVariableAccess(active_transform, command);
-                PrintLine(ret);
+                PrintLine(_pre_cmd + ret);
                 return;
             }
 
@@ -79,7 +70,7 @@ namespace HopeTools
             if (command.StartsWith("$") && command.Length > 1)
             {
                 var ret = ProcessVariableAccess(command);
-                PrintLine(ret);
+                PrintLine(_pre_cmd + ret);
                 return;
             }
 
@@ -97,29 +88,28 @@ namespace HopeTools
             }
             else if (cmd == "history")
             {
-                ShowHistory();
+                PrintLine(_pre_cmd + ShowHistory());
             }
             else if (cmd == "time")
             {
-                ShowTime();
+                PrintLine(_pre_cmd + GetCurrentTime());
             }
             else if (cmd == "ls")
             {
-                ListChildren();
+                PrintLine(_pre_cmd + ListChildren());
             }
             else if (cmd == "cd")
             {
-                ChangeDirectory(par);
+                PrintLine(ChangeDirectory(par));				   
             }
-
             else if (cmd == "addroot")
             {
-                FindAndAddTfToManager(par);
+                PrintLine(_pre_cmd + FindAndAddTfToManager(par));
             }
 
             else
             {
-                PrintLine("Command not found: " + cmd + ". Type 'help' for available commands.");
+                PrintLine(_pre_cmd + "Command not found: " + cmd + ". Type 'help' for available commands.");
             }
         }
 
@@ -331,6 +321,28 @@ namespace HopeTools
                 case "udonevent":
                     return GetSetUdonEvn(tf, _mem2, value);
                     break;
+                case "img":
+                case "image":
+                case "rawimg":
+                case "rawimage":
+                case "ri":
+                    return GetSetImage(tf, _mem2, value);
+                    break;
+                case "slider":
+                case "sl":
+                    return GetSetSlider(tf, _mem2, value);
+                    break;
+                case "audio":
+                case "aud":
+                case "audiosource":
+                case "as":
+                    return GetSetAudioSource(tf, _mem2, value);
+                    break;
+                case "boxcollider":
+                case "box":
+                case "bc":
+                    return GetSetBoxCollider(tf, _mem2, value);
+                    break;
                 default:
                     ;
                     break;
@@ -343,33 +355,7 @@ namespace HopeTools
         #region other comd
         private void ShowHelp()
         {
-            PrintLine("Available commands:");
-            PrintLine("  help     - Show this help message");
-            PrintLine("  clear    - Clear the console");
-            PrintLine("  history  - Show command history");
-            PrintLine("  vars     - List all variables");
-            PrintLine("  time     - Show current time");
-            PrintLine("  ls       - List children of active_transform");
-            PrintLine("  cd       - Change directory (usage: cd PATH)");
-            PrintLine("            - Use '..' to go to parent directory");
-            PrintLine("            - Use '/path/to/object' for absolute path");
-            PrintLine("            - Use 'path/to/object' for relative path");
-            PrintLine("            - Use quotes for names with spaces: cd \"My Object\"");
-            PrintLine("  addroot  - Add a transform to manager (usage: addroot PATH)");
-            PrintLine("  $var     - Access variable value (usage: $variableName)");
-            PrintLine("            - Variables can be used in assignment: newVar = $oldVar");
-            PrintLine("            - Mixed strings: msg = \"Hello $name, value is $val\"");
-            PrintLine("            - Assignment with $ prefix: $var = 6 or $var = \"value\"");
-            PrintLine("  $pwd     - System variable that stores current directory path");
-            PrintLine("            - Automatically updated when using cd command");
-            PrintLine("            - Read-only variable (cannot be assigned directly)");
-            PrintLine("  .member  - Access UdonSharpBehaviour member variable");
-            PrintLine("  .active  - Get or set GameObject active state");
-            PrintLine("  .transform- Get Transform component information");
-            PrintLine("  .transform.member - Access Transform member variable");
-            PrintLine("  .member = value - Set UdonSharpBehaviour member variable");
-            PrintLine("  .transform.member = value - Set Transform member variable");
-            PrintLine("  .active = true/false - Set GameObject active state");
+            ;
         }
 
         // Helper method to process variable substitution in strings
@@ -409,16 +395,17 @@ namespace HopeTools
             return null;
         }
 
-        private void ListVariables()
+        private string ListVariables()
         {
-            PrintLine("Variables:");
+            var s = "";
             for (int i = 0; i < variableCount; i++)
             {
-                PrintLine("  " + variableNames[i] + " = " + variableValues[i]);
+                s += "  " + variableNames[i] + " = " + variableValues[i] + "\n";
             }
+            return s;
         }
 
-        private void ShowTime()
+        private string GetCurrentTime()
         {
             // Udon compatible time formatting
             System.DateTime now = System.DateTime.Now;
@@ -430,10 +417,10 @@ namespace HopeTools
             string second = now.Second.ToString().PadLeft(2, '0');
 
             string currentTime = year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
-            PrintLine("Current time: " + currentTime);
+            return "Current time: " + currentTime;
         }
 
-        private void ListChildren()
+        private string ListChildren()
         {
             var s = "";
             if (active_transform == null)
@@ -443,7 +430,7 @@ namespace HopeTools
                     if (_managered_transform[i] == null) continue;
                     s += _managered_transform[i].name + ",";
                 }
-                PrintLine(s);
+                return s;
             }
             else
             {
@@ -451,18 +438,18 @@ namespace HopeTools
                 {
                     s += active_transform.GetChild(i).name + ",";
                 }
-                PrintLine(s);
+                return s;
             }
+			
         }
         
 
-        private void FindAndAddTfToManager(string path)
+        private string FindAndAddTfToManager(string path)
         {
             path = path.Trim();
             if (string.IsNullOrEmpty(path))
             {
-                PrintLine("Path is empty.");
-                return;
+               return "Path is empty.";
             }
 
             if (path[0] == '/')
@@ -485,8 +472,15 @@ namespace HopeTools
 
             if (tf == null)
             {
-                PrintLine("No such GameObject: " + path);
-                return;
+                return "No such GameObject: " + path;
+            }
+            for(int i = 0; i < _managered_transform.Length; i++)
+								  
+            {
+                if (_managered_transform[i] == tf)
+                {
+                    return "TF already in manager.";
+                }
             }
 
             for (int i = 0; i < _managered_transform.Length; i++)
@@ -494,15 +488,15 @@ namespace HopeTools
                 if (_managered_transform[i] == null)
                 {
                     _managered_transform[i] = tf;
-                    PrintLine("Add " + path + " to manager.");
-                    return;
+                    return "Add " + path + " to manager.";
                 }
             }
-            PrintLine("_managered_transform is Full");
+            return "_managered_transform is Full";
         }
 
         private string ChangeDirectory(string path)
         {
+            path = path.Trim();
             if (string.IsNullOrEmpty(path))
             {
                 return "[err] dir is null !!!";
@@ -533,7 +527,7 @@ namespace HopeTools
                 path = path.Substring(1);
                 current = null;
             }
-
+            
             if (string.IsNullOrEmpty(path))
             {
                 if (current != null)
@@ -559,7 +553,6 @@ namespace HopeTools
                     }
                     else
                     {
-                        PrintLine("已在根目录，无法返回上级");
                         return "[err] 已在根目录";
                     }
                 }
@@ -572,8 +565,7 @@ namespace HopeTools
                     Transform child = FindChildTransform(current, seg);
                     if (child == null)
                     {
-                        PrintLine("找不到子物体: " + seg);
-                        return "[err] No such GameObject: " + seg;
+                        return "找不到子物体: " + seg;
                     }
                     current = child;
                 }
@@ -620,6 +612,15 @@ namespace HopeTools
                 GameObject rootObj = GameObject.Find(childName);
                 if (rootObj != null)
                 {
+                    // 自动加入管理器
+                    for (int j = 0; j < _managered_transform.Length; j++)
+                    {
+                        if (_managered_transform[j] == null)
+                        {
+                            _managered_transform[j] = rootObj.transform;
+                            break;
+                        }
+                    }
                     return rootObj.transform;
                 }
                 return null;
@@ -1036,46 +1037,83 @@ namespace HopeTools
                 return "[err] :No active Transform selected";
             }
             var text_comp = tf.GetComponent<Text>();
+            TMPro.TMP_Text tmp_comp = null;
             if (text_comp == null)
             {
-                return "[err] : No Text component found on the selected Transform";
+                tmp_comp = tf.GetComponent<TMPro.TMP_Text>();
+                if (tmp_comp == null)
+                {
+                    return "[err] : No Text or TextMeshPro/TMP_Text component found on the selected Transform";
+                }
             }
+
             if (string.IsNullOrEmpty(valset))
             {
-                return text_comp.text;
+                if (text_comp != null)
+                    return text_comp.text;
+                else
+                    return tmp_comp.text;
             }
 
             if (_mem2 == "text" || _mem2 == "" || _mem2 == "t")
             {
                 MyParseValue(valset, out object val, out string typ);
-                text_comp.text = val.ToString();
-                return text_comp.text;
+                if (text_comp != null)
+                    text_comp.text = val.ToString();
+                else
+                    tmp_comp.text = val.ToString(); 
+                return val.ToString();
             }
 
             else if (_mem2 == "fontsize" || _mem2 == "fts")
             {
-                if(int.TryParse(valset, out int fts))
+                if (text_comp != null)
                 {
-                    text_comp.fontSize = fts;
+                    if (int.TryParse(valset, out int ftsInt))
+                    {
+                        text_comp.fontSize = ftsInt;
+                        return "set fontsize to " + ftsInt.ToString();
+                    }
                 }
                 else
                 {
-                    return "[err] : Set fontsize failed, invalid value: " + valset;
+                    if (float.TryParse(valset, out float ftsFloat))
+                    {
+                        tmp_comp.fontSize = ftsFloat;
+                        return "set fontsize to " + ftsFloat.ToString();
+                    }
                 }
-                return "set fontsize to " + text_comp.fontSize.ToString();
+                return "[err] : Set fontsize failed, invalid value: " + valset;
+            }
+
+            else if (_mem2 == "color" || _mem2 == "c")
+            {
+                if (TryParseFloatList(valset, out float[] list) && list.Length >= 3)
+                {
+                    Color col = new Color(list[0], list[1], list[2], list.Length >= 4 ? list[3] : 1f);
+                    if (text_comp != null)
+                        text_comp.color = col;
+                    else
+                        tmp_comp.color = col;
+                    return "set color to " + col.ToString();
+                }
+                return "[err] : Set color failed, invalid value: " + valset;
             }
 
             else if (_mem2 == "enable" || _mem2 == "active" || _mem2 == "isenabled" || _mem2 == "en")
             {
                 if (TypParseBool(valset, out bool b))
                 {
-                    text_comp.enabled = b;
+                    if (text_comp != null)
+                        text_comp.enabled = b;
+                    else
+                        tmp_comp.enabled = b;
                 }
                 else
                 {
                     return "[err] : Set active failed, invalid value: " + valset;
                 }
-                return "set active to " + text_comp.enabled.ToString();
+                return "set active to " + b.ToString();
             }
 
             return "[err] illege";
@@ -1106,7 +1144,7 @@ namespace HopeTools
         // Helper method to get Transform property value and type
         private void GetSetTransformPropertyValue(Transform tf, string propertyName, string valset, out object val, out string typ)
         {
-
+            
             if (propertyName == "")
             {
                 val = $"name : {tf.name},active : {tf.gameObject.activeSelf}, position : {tf.position}, localPosition : {tf.localPosition}, localScale : {tf.localScale}";
@@ -1228,6 +1266,306 @@ namespace HopeTools
                     typ = "null";
                     return;
             }
+        }
+
+        private string GetSetImage(Transform tf, string _mem2, string valset)
+        {
+            if (tf == null)
+            {
+                return "[err] :No active Transform selected";
+            }
+            var imgComp = tf.GetComponent<UnityEngine.UI.Image>();
+            var rawComp = tf.GetComponent<UnityEngine.UI.RawImage>();
+            if (imgComp == null && rawComp == null)
+            {
+                return "[err] : No Image or RawImage component found";
+            }
+
+            // no sub-member specified — return current state
+            if (string.IsNullOrEmpty(_mem2))
+            {
+                if (imgComp != null)
+                    return "Image: enabled=" + imgComp.enabled + ", color=" + imgComp.color;
+                else
+                    return "RawImage: enabled=" + rawComp.enabled + ", color=" + rawComp.color;
+            }
+
+            _mem2 = _mem2.ToLower();
+
+            if (_mem2 == "en" || _mem2 == "active" || _mem2 == "isenabled" || _mem2 == "enable")
+            {
+                if (string.IsNullOrEmpty(valset))
+                {
+                    return imgComp != null ? imgComp.enabled.ToString() : rawComp.enabled.ToString();
+                }
+                if (TypParseBool(valset, out bool b))
+                {
+                    if (imgComp != null) imgComp.enabled = b;
+                    else rawComp.enabled = b;
+                    return "set enabled to " + b;
+                }
+                return "[err] : Set enabled failed, invalid value: " + valset;
+            }
+
+            if (_mem2 == "color" || _mem2 == "c")
+            {
+                if (string.IsNullOrEmpty(valset))
+                {
+                    if (imgComp != null) return imgComp.color.ToString();
+                    else return rawComp.color.ToString();
+                }
+                if (TryParseFloatList(valset, out float[] list) && list.Length >= 3)
+                {
+                    Color col = new Color(list[0], list[1], list[2], list.Length >= 4 ? list[3] : 1f);
+                    if (imgComp != null) imgComp.color = col;
+                    else rawComp.color = col;
+                    return "set color to " + col;
+                }
+                return "[err] : Set color failed, invalid value: " + valset;
+            }
+
+            return "[err] illege";
+        }
+
+        private string GetSetSlider(Transform tf, string _mem2, string valset)
+        {
+            if (tf == null)
+            {
+                return "[err] :No active Transform selected";
+            }
+            var sliderComp = tf.GetComponent<UnityEngine.UI.Slider>();
+            if (sliderComp == null)
+            {
+                return "[err] : No Slider component found";
+            }
+
+            // no sub-member specified — return current state
+            if (string.IsNullOrEmpty(_mem2))
+            {
+                return "Slider: value=" + sliderComp.value + ", min=" + sliderComp.minValue
+                    + ", max=" + sliderComp.maxValue + ", enabled=" + sliderComp.enabled
+                    + ", interactable=" + sliderComp.interactable;
+            }
+
+            _mem2 = _mem2.ToLower();
+
+            if (_mem2 == "val" || _mem2 == "value" || _mem2 == "")
+            {
+                if (string.IsNullOrEmpty(valset))
+                    return sliderComp.value.ToString();
+                if (float.TryParse(valset, out float v))
+                {
+                    sliderComp.value = v;
+                    return "set value to " + v;
+                }
+                return "[err] : Set value failed, invalid value: " + valset;
+            }
+
+            if (_mem2 == "max" || _mem2 == "maxval" || _mem2 == "maxvalue")
+            {
+                if (string.IsNullOrEmpty(valset))
+                    return sliderComp.maxValue.ToString();
+                if (float.TryParse(valset, out float v))
+                {
+                    sliderComp.maxValue = v;
+                    return "set maxValue to " + v;
+                }
+                return "[err] : Set maxValue failed, invalid value: " + valset;
+            }
+
+            if (_mem2 == "min" || _mem2 == "minval" || _mem2 == "minvalue")
+            {
+                if (string.IsNullOrEmpty(valset))
+                    return sliderComp.minValue.ToString();
+                if (float.TryParse(valset, out float v))
+                {
+                    sliderComp.minValue = v;
+                    return "set minValue to " + v;
+                }
+                return "[err] : Set minValue failed, invalid value: " + valset;
+            }
+
+            if (_mem2 == "en" || _mem2 == "active" || _mem2 == "isenabled" || _mem2 == "enable")
+            {
+                if (string.IsNullOrEmpty(valset))
+                    return sliderComp.enabled.ToString();
+                if (TypParseBool(valset, out bool b))
+                {
+                    sliderComp.enabled = b;
+                    return "set enabled to " + b;
+                }
+                return "[err] : Set enabled failed, invalid value: " + valset;
+            }
+
+            if (_mem2 == "interactable" || _mem2 == "int")
+            {
+                if (string.IsNullOrEmpty(valset))
+                    return sliderComp.interactable.ToString();
+                if (TypParseBool(valset, out bool b))
+                {
+                    sliderComp.interactable = b;
+                    return "set interactable to " + b;
+                }
+                return "[err] : Set interactable failed, invalid value: " + valset;
+            }
+
+            return "[err] illege";
+        }
+
+        private string GetSetAudioSource(Transform tf, string _mem2, string valset)
+        {
+            if (tf == null)
+            {
+                return "[err] :No active Transform selected";
+            }
+            var aud = tf.GetComponent<AudioSource>();
+            if (aud == null)
+            {
+                return "[err] : No AudioSource component found";
+            }
+
+            // no sub-member — return summary
+            if (string.IsNullOrEmpty(_mem2))
+            {
+                return "AudioSource: mute=" + aud.mute + ", loop=" + aud.loop
+                    + ", enabled=" + aud.enabled + ", volume=" + aud.volume
+                    + ", pitch=" + aud.pitch + ", minDist=" + aud.minDistance
+                    + ", maxDist=" + aud.maxDistance;
+            }
+
+            _mem2 = _mem2.ToLower();
+
+            if (_mem2 == "mute")
+            {
+                if (string.IsNullOrEmpty(valset))
+                    return aud.mute.ToString();
+                if (TypParseBool(valset, out bool b))
+                {
+                    aud.mute = b;
+                    return "set mute to " + b;
+                }
+                return "[err] : Set mute failed, invalid value: " + valset;
+            }
+
+            if (_mem2 == "loop")
+            {
+                if (string.IsNullOrEmpty(valset))
+                    return aud.loop.ToString();
+                if (TypParseBool(valset, out bool b))
+                {
+                    aud.loop = b;
+                    return "set loop to " + b;
+                }
+                return "[err] : Set loop failed, invalid value: " + valset;
+            }
+
+            if (_mem2 == "en" || _mem2 == "active" || _mem2 == "isenabled" || _mem2 == "enable")
+            {
+                if (string.IsNullOrEmpty(valset))
+                    return aud.enabled.ToString();
+                if (TypParseBool(valset, out bool b))
+                {
+                    aud.enabled = b;
+                    return "set enabled to " + b;
+                }
+                return "[err] : Set enabled failed, invalid value: " + valset;
+            }
+
+            if (_mem2 == "volume" || _mem2 == "vol")
+            {
+                if (string.IsNullOrEmpty(valset))
+                    return aud.volume.ToString();
+                if (float.TryParse(valset, out float v))
+                {
+                    aud.volume = v;
+                    return "set volume to " + v;
+                }
+                return "[err] : Set volume failed, invalid value: " + valset;
+            }
+
+            if (_mem2 == "pitch")
+            {
+                if (string.IsNullOrEmpty(valset))
+                    return aud.pitch.ToString();
+                if (float.TryParse(valset, out float v))
+                {
+                    aud.pitch = v;
+                    return "set pitch to " + v;
+                }
+                return "[err] : Set pitch failed, invalid value: " + valset;
+            }
+
+            if (_mem2 == "mindistance" || _mem2 == "mindist" || _mem2 == "min")
+            {
+                if (string.IsNullOrEmpty(valset))
+                    return aud.minDistance.ToString();
+                if (float.TryParse(valset, out float v))
+                {
+                    aud.minDistance = v;
+                    return "set minDistance to " + v;
+                }
+                return "[err] : Set minDistance failed, invalid value: " + valset;
+            }
+
+            if (_mem2 == "maxdistance" || _mem2 == "maxdist" || _mem2 == "max")
+            {
+                if (string.IsNullOrEmpty(valset))
+                    return aud.maxDistance.ToString();
+                if (float.TryParse(valset, out float v))
+                {
+                    aud.maxDistance = v;
+                    return "set maxDistance to " + v;
+                }
+                return "[err] : Set maxDistance failed, invalid value: " + valset;
+            }
+
+            return "[err] illege";
+        }
+
+        private string GetSetBoxCollider(Transform tf, string _mem2, string valset)
+        {
+            if (tf == null)
+            {
+                return "[err] :No active Transform selected";
+            }
+            var bc = tf.GetComponent<BoxCollider>();
+            if (bc == null)
+            {
+                return "[err] : No BoxCollider component found";
+            }
+
+            if (string.IsNullOrEmpty(_mem2))
+            {
+                return "BoxCollider: enabled=" + bc.enabled + ", isTrigger=" + bc.isTrigger;
+            }
+
+            _mem2 = _mem2.ToLower();
+
+            if (_mem2 == "en" || _mem2 == "active" || _mem2 == "isenabled" || _mem2 == "enable")
+            {
+                if (string.IsNullOrEmpty(valset))
+                    return bc.enabled.ToString();
+                if (TypParseBool(valset, out bool b))
+                {
+                    bc.enabled = b;
+                    return "set enabled to " + b;
+                }
+                return "[err] : Set enabled failed, invalid value: " + valset;
+            }
+
+            if (_mem2 == "istrigger" || _mem2 == "trigger" || _mem2 == "trig")
+            {
+                if (string.IsNullOrEmpty(valset))
+                    return bc.isTrigger.ToString();
+                if (TypParseBool(valset, out bool b))
+                {
+                    bc.isTrigger = b;
+                    return "set isTrigger to " + b;
+                }
+                return "[err] : Set isTrigger failed, invalid value: " + valset;
+            }
+
+            return "[err] illege";
         }
 
         #endregion unity compnent
@@ -1442,6 +1780,29 @@ namespace HopeTools
             return false;
         }
 
+        /// <summary>
+        /// Try parse string to Color via TryParseFloatList
+        /// Supports: (r, g, b) or (r, g, b, a), brackets optional
+        /// alpha defaults to 1
+        /// </summary>
+        public bool TryParseColor(string valset, out Color result)
+        {
+            result = Color.white;
+            if (string.IsNullOrEmpty(valset)) return false;
+
+            if (valset.StartsWith("$"))
+            {
+                valset = GetVariable(valset.Substring(1).Trim());
+                if (string.IsNullOrEmpty(valset)) return false;
+            }
+
+            if (!TryParseFloatList(valset, out float[] list)) return false;
+            if (list.Length < 3 || list.Length > 4) return false;
+
+            result = new Color(list[0], list[1], list[2], list.Length >= 4 ? list[3] : 1f);
+            return true;
+        }
+
         #endregion
 
         #endregion Command Processing
@@ -1466,7 +1827,6 @@ namespace HopeTools
             {
                 return;
             }
-            clear_cmdline();
             AddCommandToHistory(command);
             ProcessCommand(command);
         }
@@ -1485,31 +1845,41 @@ namespace HopeTools
                 {
                     continue;
                 }
-                ProcessCommand(ss[i]);
-            }
-        }
+                var s = ss[i].Trim();
 
-        public InputField cmd_line;
-        public void OnCmdLineSubmit()
-        {
-            if (cmd_line != null)
-            {
-                string command = cmd_line.text.Trim();
-                // LogMessage($"CmdLine Submit: {command}");
-                if (!string.IsNullOrEmpty(command))
+                if(ss[i].StartsWith("#cmd"))
                 {
-                    InputCommand(command);
+                    s = s.Substring(5).Trim();                
                 }
-                cmd_line.text = ">";
-            }
-        }
+                else if(s.StartsWith("#") || s.StartsWith("//"))
+                {
+                    continue;
+                }
+                // msgid 转为 "cd "
+               else if(ss[i].StartsWith("msgid"))
+                {
+                    s = s.Substring(5).Trim();
+                    s = "cd " + s;
+                }
+                // msgstr 转为 ".t = "
+                else if(ss[i].StartsWith("msgstr"))
+                {
+                    s = s.Substring(6).Trim();
+                    s = ".t = " + s;
+                }
 
-        public void clear_cmdline()
+                PrintLine(GetVariable("pwd") + ">>> " + s);
+                ProcessCommand(s);
+            }								
+        }
+		
+        public object eventData;
+        public object eventData1;
+        public object eventData2;
+        public void ex()
         {
-            if (cmd_line != null)
-            {
-                cmd_line.text = ">";
-            }
+            var s = (string) this.eventData;
+            InputCommandText(s);
         }
 
         #endregion Input cmdline
@@ -1556,29 +1926,28 @@ namespace HopeTools
 
         public void OnCmdLineUpArrow()
         {
-            if (cmd_line == null || historySize == 0) return;
+            if (historySize == 0) return;
 
             if (!isNavigatingHistory)
             {
-                // 开始导航历史，从最新的一条开始
+                // navigate history from the latest
                 isNavigatingHistory = true;
                 historyNavigateIndex = historyCurrentIndex == 0 ? historySize - 1 : historyCurrentIndex - 1;
             }
             else
             {
-                // 继续向上导航
+                // navigate up
                 int prevIndex = (historyNavigateIndex - 1 + historyMaxLines) % historyMaxLines;
                 
-                // 检查是否已经到达最早的历史记录
                 if (historySize < historyMaxLines && prevIndex >= historySize - 1)
                 {
-                    // 到达最早记录，保持在第一条
+                    // reached earliest record, stay at first
                     historyNavigateIndex = 0;
                 }
                 else if (historySize == historyMaxLines && prevIndex == (historyCurrentIndex - 1 + historyMaxLines) % historyMaxLines)
                 {
-                    // 环形缓冲区已满且到达最早记录
-                    cmd_line.text = ">";
+                    // buffer full and reached earliest
+                    ClearCmdLine();
                     return;
                 }
                 else
@@ -1586,48 +1955,47 @@ namespace HopeTools
                     historyNavigateIndex = prevIndex;
                 }
             }            
-            // 显示历史命令
-            cmd_line.text = ">" + historyCmd[historyNavigateIndex];
+            SetCmdLine(">" + historyCmd[historyNavigateIndex]);
         }
 
         public void OnCmdLineDownArrow()
         {
-            if (cmd_line == null || historySize == 0 || !isNavigatingHistory) return;
+            if (historySize == 0 || !isNavigatingHistory) return;
 
-            // 计算下一条历史记录的索引
             int nextIndex = (historyNavigateIndex + 1) % historyMaxLines;
 
-            // 检查是否已经回到当前输入位置
             if (nextIndex == historyCurrentIndex || (historySize < historyMaxLines && nextIndex >= historySize))
             {
-                // 回到当前输入，清空导航状态
+                // back to current input
                 isNavigatingHistory = false;
-                cmd_line.text = ">";
+                SetCmdLine(">");
                 return;
             }
 
             historyNavigateIndex = nextIndex;
-            cmd_line.text = ">" + historyCmd[historyNavigateIndex];
+            SetCmdLine(">" + historyCmd[historyNavigateIndex]);
         }
-        private void ShowHistory()
+
+        private string ShowHistory()
         {
             if (historyCmd == null)
             {
-                PrintLine("Command History: (empty)");
-                return;
+                return "";
             }
-            PrintLine("Command History:");
+            var s = "Command History:";
             for (int i = 0; i < historyCmd.Length; i++)
             {
-                PrintLine("  " + (i + 1) + ": " + historyCmd[i]);
+                s += "  " + (i + 1) + ": " + historyCmd[i] + "\n";
             }
+            return s;
         }
 
         #endregion History System
 
         #region Screen Methods extern API
         
-        public HopeShellScreen _screen;
+        public UdonBehaviour _udon_api;
+        public Text _text1;
 
         private void ClearCommand()
         {
@@ -1636,15 +2004,42 @@ namespace HopeTools
 
         private void PrintLine(string text)
         {
-            if (_screen != null)
-                _screen.PrintLine(text);
+            if (_udon_api != null)
+            {
+                _udon_api.SetProgramVariable("eventData", text);
+                _udon_api.SendCustomEvent("Evn_PrintLine");
+            }
+            if(_text1 != null)
+                _text1.text += text + "\n";
+            LogMessage(text);
         }
-        
+
         private void ClearScreen()
         {
-            if (_screen != null)
-                _screen.ClearScreen();
+            if (_udon_api != null)
+            {
+                _udon_api.SendCustomEvent("Evn_ClearScreen");
+            }
+            if (_text1 != null)
+                _text1.text = "";
         }
+
+        private void SetCmdLine(string text)
+        {
+            if (_udon_api != null)
+            {
+                _udon_api.SetProgramVariable("eventData", text);
+                _udon_api.SendCustomEvent("Evn_SetCmdLine");
+            }
+        }
+
+        public void ClearCmdLine()
+        {
+            if(_udon_api != null)
+                return;
+            _udon_api.SendCustomEvent("Evn_ClearCmdLine");
+        }
+
         #endregion Screen Methods extern API
 
         public void LogMessage(string message)
@@ -1653,3 +2048,6 @@ namespace HopeTools
         }
     }
 }
+
+
+																							 

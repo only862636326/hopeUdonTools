@@ -240,6 +240,12 @@ namespace HopeTools
         float soft_pause_time = 0;
         public void ContinueAutoTrigger()
         {
+            if(this.gameObject.activeSelf == false)
+            {
+                StopAutoTrigger();
+                return;
+            }
+
             if (!is_auto_triggering || _pre_run_index >= _evn_index)
             {
                 StopAutoTrigger();

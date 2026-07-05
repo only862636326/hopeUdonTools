@@ -16,7 +16,6 @@ namespace HuPad
 
         private void Start()
         {
-            InitAppCtr();
             Init();
         }
         private bool _is_init = false;
@@ -33,6 +32,7 @@ namespace HuPad
                 //item.enabled = false;
             }
             this.GetComponent<BoxCollider>().enabled = true;
+            InitAppCtr();
         }
 
 #if false
@@ -60,7 +60,7 @@ namespace HuPad
         }
 #endif
 
-#endregion end init code
+        #endregion end init code
         private void Update()
         {
             _UpdatePingTime();
@@ -317,6 +317,15 @@ namespace HuPad
                     return;
                 }
             }
+
+            // 没有应用打开，切换主页按钮
+            if (_toggle_btn_list != null && _toggle_btn_list.Length > 0 && _toggle_btn_list[0] != null)
+                _toggle_btn_list[0].isOn = !_toggle_btn_list[0].isOn;
+        }
+
+        public void ToggleEvn_AppClose()
+        {
+            ToggleEvn_HuPadBottomClick();
         }
 
         #region 屏保时间显示　

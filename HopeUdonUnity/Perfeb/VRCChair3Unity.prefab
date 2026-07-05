@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 196403238573022354}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.238, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -56,7 +56,7 @@ Transform:
   m_GameObject: {fileID: 4427554002038513303}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.238, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -114,7 +114,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PlayerMobility: 1
   canUseStationFromStation: 1
-  animatorController: {fileID: 0}
+  animatorController: {fileID: 9100000, guid: e01701f523f868f41a58dabe408ef2e3, type: 2}
   disableStationExit: 1
   seated: 1
   stationEnterPlayerLocation: {fileID: 8351722278376740835}

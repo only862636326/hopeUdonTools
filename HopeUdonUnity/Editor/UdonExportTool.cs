@@ -137,8 +137,8 @@ public class UdonExportTool : Editor
         var tmpTexts = root.GetComponentsInChildren<TMP_Text>(true);
 
         var sb = new System.Text.StringBuilder();
-        sb.AppendLine("# addroot \"/" + root.name + "\"");
-        sb.Append("# cd \"/" + root.name + "\"\n\n");
+        sb.AppendLine("#cmd addroot \"/" + root.name + "\"");
+        sb.Append("#cmd cd \"/" + root.name + "\"\n\n");
 
         foreach (var t in uiTexts)
         {

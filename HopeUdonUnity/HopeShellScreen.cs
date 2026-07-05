@@ -4,18 +4,15 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
 using UnityEngine.UI;
+using System;
 
 namespace HopeTools
 {
     public class HopeShellScreen : UdonSharpBehaviour
     {
-        public InputField _screen_text;
-        public Scrollbar _scrobal;
-        public int _line_count = 0;
 
+        
         private bool _is_forbig = false;
-        public UdonSharpBehaviour _udon;
-
         void Start()
         {
             ;
@@ -24,8 +21,18 @@ namespace HopeTools
         void Update()
         {
             ForbigCheck();
+
+            if (Input.GetKeyDown(KeyCode.UpArrow) && hope_shell != null)
+            {
+                hope_shell.OnCmdLineUpArrow();
+            }
+            else if (Input.GetKeyDown(KeyCode.DownArrow) && hope_shell != null)
+            {
+                hope_shell.OnCmdLineDownArrow();
+            }
         }
 
+        public UdonSharpBehaviour extern_forbid_udon;
         void ForbigCheck()
         {
             // ctrl + alt + t
@@ -34,7 +41,7 @@ namespace HopeTools
                 _is_forbig = !_is_forbig;
                 PrintLine("HopeShell Forbig mode : " + (_is_forbig ? "ON" : "OFF"));
 
-                if (_udon == null)
+                if (extern_forbid_udon == null)
                 {
                     Networking.LocalPlayer.Immobilize(_is_forbig);
                     Networking.LocalPlayer.SetJumpImpulse(!_is_forbig ? 3.0f : 0.0f);
@@ -42,43 +49,79 @@ namespace HopeTools
                 else
                 {
                     string eventName = _is_forbig ? "SuperForbig" : "SuperForbigOff";
-                    _udon.SendCustomEvent(eventName);
+                    extern_forbid_udon.SendCustomEvent(eventName);
                 }
             }
         }
 
+        public Text _screen_text;
+        public HopeShell hope_shell;
+
         public void PrintLine(string line)
         {
-            _line_count += 1;
-            _screen_text.text += "    " + line + "\r\n";
-
-            AutoHeight();
-            SendCustomEventDelayedSeconds(nameof(ScrollToBottom), 0.05f);
-        }
-
-        public void ScrollToBottom()
-        {
-            _scrobal.value = 0.0f;
+            if(_screen_text == null)
+                return;
+            _screen_text.text += line + "\n";
         }
 
         public void ClearScreen()
         {
-            _line_count = 0;
+            if(_screen_text == null)
+                return;
             _screen_text.text = "";
-            AutoHeight();
         }
 
-        private float _org_height = 0;
-        private void AutoHeight()
+
+        public object eventData;
+        public void Evn_PrintLine()
         {
-            if(_org_height < 10.0f)
-                _org_height = _screen_text.GetComponent<RectTransform>().sizeDelta.y;
-
-            var h = _line_count * 18.0f;
-            h = Mathf.Max(h, _org_height);
-            var org_wh = _screen_text.GetComponent<RectTransform>().sizeDelta;
-            org_wh.y = h;
-            _screen_text.GetComponent<RectTransform>().sizeDelta = org_wh;
+            PrintLine(eventData.ToString());
         }
+        public void Evn_ClearScreen()
+        {
+            ClearScreen();
+        }
+
+        public InputField cmd_line;
+
+        public void OnCmdLineSubmit()
+        {
+            if (hope_shell == null || cmd_line == null || cmd_line.text == "")
+                return;
+            var cmd = cmd_line.text;
+            cmd = cmd.Trim();
+            if (cmd.StartsWith(">"))
+            {
+                cmd = cmd.Substring(1);
+            }
+            hope_shell.InputCommandText(cmd);
+            cmd_line.text = ">";
+        }
+        
+        public void Evn_SetCmdLine()
+        {
+            if(cmd_line == null)
+                return;
+
+            cmd_line.text = (string)eventData;
+        }
+
+        public void AddCmdLine(string line)
+        {
+            if(cmd_line == null)
+                return;
+            cmd_line.text += line + "\n";
+        }
+
+        public void Evn_ClearCmdLine()
+        {
+            cmd_line.text = "";
+        }
+
+
     }
 }
+
+
+
+
