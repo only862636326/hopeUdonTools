@@ -27,17 +27,21 @@ public class HopeShellWebInput : UdonSharpBehaviour
     private bool isLoading;
     
     private string lastResult;
-
+    
+    public bool _en_in_unity = false;
 
 
     void Start()
     {
-        ;
+#if UNITY_EDITOR
+        this.gameObject.SetActive(_en_in_unity);
+#endif
+        urlInputField.SetUrl(targetUrl);
     }
 
     void Update()
     {
-        if (auto_down)           
+        if (auto_down && this.gameObject.activeSelf)
         {
             LoadString();
         }

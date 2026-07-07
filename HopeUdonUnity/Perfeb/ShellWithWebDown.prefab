@@ -92,6 +92,8 @@ MonoBehaviour:
     url: http://localhost:5004/
   auto_down: 1
   _tar_duon: {fileID: 8112628795922989870}
+  tips_text: {fileID: 0}
+  tipsdown_text: {fileID: 0}
   urlInputField: {fileID: 0}
   atuto_down_toggle: {fileID: 0}
 --- !u!114 &2580292449690970121

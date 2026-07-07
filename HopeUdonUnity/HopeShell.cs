@@ -113,6 +113,45 @@ namespace HopeTools
             }
         }
 
+        private string string_placeholder(string s)
+        {
+            if(string.IsNullOrWhiteSpace(s))
+            {
+                return "";
+            }
+
+            // 先去外层引号
+            bool isQuoted = (s.StartsWith("\"") && s.EndsWith("\"")) || (s.StartsWith("'") && s.EndsWith("'"));
+            if (isQuoted)
+            {
+                s = s.Substring(1, s.Length - 2);
+            }
+
+            // {$var} 变量替换
+            int startIdx;
+            while ((startIdx = s.IndexOf("{$")) != -1)
+            {
+                int endIdx = s.IndexOf("}", startIdx + 2);
+                if (endIdx == -1) break;
+
+                string varName = s.Substring(startIdx + 2, endIdx - startIdx - 2);
+                string varValue = GetVariable(varName);
+                if (varValue == null) varValue = "";
+
+                // 去掉变量值的外层引号
+                if (varValue.Length >= 2 &&
+                    ((varValue.StartsWith("\"") && varValue.EndsWith("\"")) ||
+                     (varValue.StartsWith("'") && varValue.EndsWith("'"))))
+                {
+                    varValue = varValue.Substring(1, varValue.Length - 2);
+                }
+
+                s = s.Substring(0, startIdx) + varValue + s.Substring(endIdx + 1);
+            }
+
+            return s;
+        }
+
          /// <summary>
          /// 处理成员变量访问和赋值
          /// 中文: 处理成员变量访问和赋值，使用.符号
@@ -145,6 +184,11 @@ namespace HopeTools
 
             if (parts.Length == 2)
             {
+                parts[1] = string_placeholder(parts[1]);
+                if (string.IsNullOrWhiteSpace(parts[1]))
+                {
+                    return "[err] : cmd err [" + assignmentExpression + "]";
+                }
                 return MemberVariableEq(tf, memberPath, parts[1].Trim());
             }
 
@@ -170,16 +214,7 @@ namespace HopeTools
                 {
                     // Variable access: $var
                     string varName = command.Substring(1);
-
-                    // Special handling for $pwd - return current directory path
-                    if (varName == "pwd")
-                    {
-                        return_value = "pwd = " + GetVariable("pwd");
-                        return return_value;
-                    }
-
                     string value = GetVariable(varName);
-
                     if (value != null)
                     {
                         return_value = varName + " = " + value;
@@ -199,7 +234,6 @@ namespace HopeTools
                     equalPos = command.IndexOf('=');
                     // Extract variable name
                     string varName = command.Substring(0, equalPos).Trim();
-
                     // Handle variable name with $ symbol
                     if (varName.StartsWith("$") && varName.Length > 1)
                     {
@@ -215,17 +249,22 @@ namespace HopeTools
 
                     // Extract value (everything after '=')
                     string value = command.Substring(equalPos + 1).Trim();
-
                     // Handle quoted values
-                    if (value.StartsWith("\"") && value.EndsWith("\""))
+                    if ((value.StartsWith("\"") && value.EndsWith("\"")) ||
+                        (value.StartsWith("'") && value.EndsWith("'")))
                     {
                         // Remove the quotes
                         value = value.Substring(1, value.Length - 2);
                     }
 
-                    else if (value.StartsWith("\'") && value.EndsWith("\'"))
+                    else if (value.StartsWith("."))
                     {
-                        value = value.Substring(1, value.Length - 2);
+                        value = MemberVariableAccess(active_transform, value);
+                        if (value.StartsWith("[err]"))
+                        {
+                            return_value = value;
+                            return return_value;
+                        }
                     }
 
                     // Handle variable references with $ symbol
@@ -263,6 +302,11 @@ namespace HopeTools
 
         private string MemberVariableEq(Transform tf, string memberPath, string value)
         {
+            if (tf == null)
+            {
+                return "[err] : err tf is null";
+            }
+
             if (memberPath.StartsWith("."))
             {
                 memberPath = memberPath.Substring(1);
@@ -1057,6 +1101,7 @@ namespace HopeTools
 
             if (_mem2 == "text" || _mem2 == "" || _mem2 == "t")
             {
+                valset = UnescapePoString(valset);
                 MyParseValue(valset, out object val, out string typ);
                 if (text_comp != null)
                     text_comp.text = val.ToString();
@@ -1869,6 +1914,7 @@ namespace HopeTools
                 }
 
                 PrintLine(GetVariable("pwd") + ">>> " + s);
+                AddCommandToHistory(s);
                 ProcessCommand(s);
             }								
         }
@@ -2045,6 +2091,12 @@ namespace HopeTools
         public void LogMessage(string message)
         {
             Debug.Log($"-------------- shell [{System.DateTime.Now}] {message}");
+        }
+
+        // Convert escaped sequences back to real control chars
+        private string UnescapePoString(string input)
+        {
+            return System.Text.RegularExpressions.Regex.Unescape(input);
         }
     }
 }

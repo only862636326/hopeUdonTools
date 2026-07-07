@@ -641,7 +641,7 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 2877013286074948892}
   managed_root: {fileID: 0}
-  show_deep: 2147483647
+  show_deep: 4
   _list_item_pre: {fileID: 8910215002373181439}
   active_tf: {fileID: 0}
   hopeUnityGameObj: {fileID: 4428816371900818807}
@@ -5822,6 +5822,12 @@ PrefabInstance:
       propertyPath: m_Value
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 6039997873933390071, guid: c8d4f86cd5529ab4b9672535a6c8cfc3,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 6039997873933390071, guid: c8d4f86cd5529ab4b9672535a6c8cfc3,
+        type: 3}
     - target: {fileID: 6149354466842110300, guid: c8d4f86cd5529ab4b9672535a6c8cfc3,
         type: 3}
       propertyPath: m_AnchorMax.x

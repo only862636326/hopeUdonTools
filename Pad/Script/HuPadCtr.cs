@@ -16,10 +16,11 @@ namespace HuPad
 
         private void Start()
         {
-            Init();
+            this.SendCustomEventDelayedSeconds(nameof(_Init), 1.0f);
         }
+
         private bool _is_init = false;
-        public void Init()
+        public void _Init()
         {
             if (this._is_init)
                 return;

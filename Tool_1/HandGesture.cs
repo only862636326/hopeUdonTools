@@ -18,7 +18,7 @@ namespace HopeTools
         }
 
         private void Update()
-        {
+        {                               
             UpdateGestureControl();
         }
 
@@ -346,7 +346,7 @@ namespace HopeTools
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public float GetAvatarHeight(VRCPlayerApi player)
+        private float GetAvatarHeight(VRCPlayerApi player)
         {
             float height = 0;
             Vector3 postition1 = player.GetBonePosition(HumanBodyBones.Head);
@@ -368,6 +368,8 @@ namespace HopeTools
         {
             if (Networking.LocalPlayer == null)
                 return 1;
+            return Networking.LocalPlayer.GetAvatarEyeHeightAsMeters();
+
             return GetAvatarHeight(Networking.LocalPlayer);
         }
 

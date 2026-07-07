@@ -2847,6 +2847,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 6174304629333405715, guid: e429b404c6d4e8a49a8d0d373b3462f5,
         type: 3}
+      propertyPath: _tar_duon
+      value: 
+      objectReference: {fileID: 768469374792795815}
+    - target: {fileID: 6174304629333405715, guid: e429b404c6d4e8a49a8d0d373b3462f5,
+        type: 3}
       propertyPath: tips_text
       value: 
       objectReference: {fileID: 2215318978444274693}
@@ -2940,7 +2945,7 @@ PrefabInstance:
     - target: {fileID: 8684106292371220459, guid: e429b404c6d4e8a49a8d0d373b3462f5,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

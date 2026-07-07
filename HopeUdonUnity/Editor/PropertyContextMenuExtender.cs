@@ -181,7 +181,7 @@ public static class PropertyContextMenuExtender
                 return property.boolValue ? "true" : "false";
 
             case SerializedPropertyType.String:
-                return "\"" + property.stringValue + "\"";
+                return "\"" + EscapePoString(property.stringValue) + "\"";
 
             case SerializedPropertyType.Integer:
                 return property.intValue.ToString();
@@ -434,6 +434,23 @@ public static class PropertyContextMenuExtender
             default:
                 return "";
         }
+    }
+
+    #endregion
+
+    #region Helpers
+
+    /// <summary>
+    /// String escaping for HopeShell command values.
+    /// </summary>
+    private static string EscapePoString(string input)
+    {
+        return input
+            .Replace("\\", "\\\\")
+            .Replace("\r", "\\r")
+            .Replace("\n", "\\n")
+            .Replace("\t", "\\t")
+            .Replace("\"", "\\\"");
     }
 
     #endregion

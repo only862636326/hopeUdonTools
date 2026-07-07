@@ -145,7 +145,7 @@ public class UdonExportTool : Editor
             if (string.IsNullOrEmpty(t.text)) continue;
             var path = GetGameObjectPath(root, t.transform);
             sb.AppendLine("msgid \"" + path + "\"");
-            sb.AppendLine("msgstr \"" + EscapePoString(t.text) + "\"");
+            sb.AppendLine("msgstr .t = \"" + EscapePoString(t.text) + "\"");
             sb.AppendLine();
         }
 
@@ -154,8 +154,42 @@ public class UdonExportTool : Editor
             if (string.IsNullOrEmpty(t.text)) continue;
             var path = GetGameObjectPath(root, t.transform);
             sb.AppendLine("msgid \"" + path + "\"");
-            sb.AppendLine("msgstr \"" + EscapePoString(t.text) + "\"");
+            sb.AppendLine("msgstr .t = \"" + EscapePoString(t.text) + "\"");
             sb.AppendLine();
+        }
+
+        // Export i18n public variables from Udon scripts
+        var udons = root.GetComponentsInChildren<UdonBehaviour>(true);
+        foreach (var udon in udons)
+        {
+            var proxy = UdonSharpEditorUtility.GetProxyBehaviour(udon);
+            if (proxy == null) continue;
+
+            var type = proxy.GetType();
+            var fields = type.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+            var objPath = GetGameObjectPath(root, udon.transform);
+
+            foreach (var field in fields)
+            {
+                if (field.IsStatic) continue;
+                if (field.IsInitOnly) continue;
+                if (field.GetCustomAttributes(typeof(System.ObsoleteAttribute), true).Length > 0) continue;
+
+                // Only export variables whose name contains "i18n" (case-insensitive)
+                if (field.Name.IndexOf("i18n", System.StringComparison.OrdinalIgnoreCase) < 0) continue;
+
+                var value = field.GetValue(proxy);
+                if (value == null) continue;
+
+                // Only export string values
+                if (value is string strValue && !string.IsNullOrEmpty(strValue))
+                {
+                    var varPath = objPath;
+                    sb.AppendLine("msgid \"" + varPath + "\"");
+                    sb.AppendLine("msgstr .u." + field.Name + " = \"" + strValue + "\"");
+                    sb.AppendLine();
+                }
+            }
         }
 
         return sb.ToString();
@@ -241,9 +275,15 @@ public class UdonExportTool : Editor
     {
         return input
             .Replace("\\", "\\\\")
-            .Replace("\"", "\\\"")
+            .Replace("\r", "\\r")
             .Replace("\n", "\\n")
-            .Replace("\r", "\\r");
+            .Replace("\t", "\\t")
+            .Replace("\"", "\\\"");
+    }
+
+    static string UnescapePoString(string input)
+    {
+        return System.Text.RegularExpressions.Regex.Unescape(input);
     }
 
     static string FormatValue(object value)
