@@ -22,7 +22,7 @@ public class HopeShellWebInput : UdonSharpBehaviour
     [Header("Download Settings")]
     [SerializeField] private VRCUrl targetUrl = new VRCUrl("http://localhost:5004/");
     [Tooltip("Start 时自动下载")]
-    [SerializeField] private bool auto_down = true;
+    [SerializeField] private bool auto_down = false;
 
     private bool isLoading;
     
@@ -33,9 +33,9 @@ public class HopeShellWebInput : UdonSharpBehaviour
 
     void Start()
     {
-#if UNITY_EDITOR
-        this.gameObject.SetActive(_en_in_unity);
-#endif
+//#if UNITY_EDITOR
+//        this.gameObject.SetActive(_en_in_unity);
+//#endif
         urlInputField.SetUrl(targetUrl);
     }
 
