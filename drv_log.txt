@@ -54,3 +54,5 @@ v260707 unity
     - shell 优化, 支持转义
     - 添加赋值时变量嵌入的支持
 	- webstringdonwn, 可设置Edit下不工作
+v260709 unity shell 
+    - shell 解析优化 

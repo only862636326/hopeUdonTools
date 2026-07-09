@@ -1910,7 +1910,6 @@ namespace HopeTools
                 else if(ss[i].StartsWith("msgstr"))
                 {
                     s = s.Substring(6).Trim();
-                    s = ".t = " + s;
                 }
 
                 PrintLine(GetVariable("pwd") + ">>> " + s);
